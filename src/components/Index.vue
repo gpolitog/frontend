@@ -1,54 +1,79 @@
 <template>
-  <q-layout>
-    <div slot="header" class="toolbar">
+  <q-layout
+    ref="layout"
+    view="lHh Lpr fff"
+    :left-class="{'bg-grey-2': true}"
+  >
+    <q-toolbar slot="header" color="primary" class="">
+      <q-btn
+        flat
+        @click="$refs.layout.toggleLeft()"
+        v-show="adminmode"
+      >
+        <q-icon name="menu" />
+      </q-btn>
 
-      <button @click="$refs.menu.open()" v-show="adminmode">
-        <i>menu</i>
-        <q-tooltip anchor="bottom middle" self="top middle" :offset="[0, 20]">Menu</q-tooltip>
-      </button>
-
-      <q-toolbar-title :padding="0">
-        Home Lighting
+      <q-toolbar-title>
+        {{appName}}
+        <div slot="subtitle">{{subTitle}}</div>
       </q-toolbar-title>
 
-      <!-- button class="primary circular" setAdminMode(true) @click="goTo('admin')" v-show="!adminMode" -->
-      <button class="primary circular" @click="adminMode()" v-show="isAuthenticated&&isAdmin&&!adminmode" >
-        <i>settings</i>
-        <q-tooltip anchor="bottom middle" self="top middle" :offset="[0, 20]">Enter Admin Mode</q-tooltip>
-      </button>
-       <button class="primary circular" @click="setAdminMode(false)" v-if="adminmode">
-        <i>stop</i>
-        <q-tooltip anchor="bottom middle" self="top middle" :offset="[0, 20]">Exit Admin Mode</q-tooltip>
-      </button>
-  
-      
-      <!--q-tabs slot="navigation">
-        <q-tab route="/singin" exact replace>Sign In</q-tab>
-        <q-tab route="/singup" exact replace>Register</q-tab>
-        <q-tab icon="featured_play_list" route="/chat" exact replace>Your Tasks</q-tab>
-      </q-tabs-->
+    <q-btn icon="settings" round color="primary" @click="adminMode()" v-show="isAuthenticated&&isAdmin&&!adminmode"  >
+      <q-tooltip anchor="bottom middle" self="top middle" :offset="[0, 20]">
+       Enter Admin Mode
+      </q-tooltip>
+    </q-btn>
 
+    <q-btn icon="stop" round color="primary" @click="setAdminMode(false)" v-if="adminmode"  >
+      <q-tooltip anchor="bottom middle" self="top middle" :offset="[0, 20]">
+       Exit Admin Mode
+      </q-tooltip>
+    </q-btn>
+
+  </q-toolbar>
+
+    <q-tabs v-model="selectedTab">
+      <q-tab slot="title" name="tab-1" icon="message" />
+      <q-tab slot="title" name="tab-2" icon="fingerprint" />
+      <q-tab slot="title" name="tab-3" icon="account_box" />
+    </q-tabs>
+
+
+
+    <div slot="left"  v-if="adminmode">
+      <!--
+        Use <q-side-link> component 
+        instead of <q-item> for 
+        internal vue-router navigation
+      -->
+
+      <q-list no-border link inset-delimiter>
+        <q-list-header>Essential Links</q-list-header>
+        <q-item @click="launch('http://quasar-framework.org')">
+          <q-item-side icon="school" />
+          <q-item-main label="Docs" sublabel="quasar-framework.org" />
+        </q-item>
+        <q-item @click="launch('http://forum.quasar-framework.org')">
+          <q-item-side icon="record_voice_over" />
+          <q-item-main label="Forum" sublabel="forum.quasar-framework.org" />
+        </q-item>
+        <q-item @click="launch('https://gitter.im/quasarframework/Lobby')">
+          <q-item-side icon="chat" />
+          <q-item-main label="Gitter Channel" sublabel="Quasar Lobby" />
+        </q-item>
+        <q-item @click="launch('https://twitter.com/quasarframework')">
+          <q-item-side icon="rss feed" />
+          <q-item-main label="Twitter" sublabel="@quasarframework" />
+        </q-item>
+      </q-list>
     </div>
 
-<!-- admin-mode :admin="true"  v-if="adminDialog"></admin-mode -->
-    
-    <!-- system settings menu admin only -->
-    <q-drawer swipe-only left-side ref="menu" >
-      <div class="toolbar light">
-        <i>menu</i>
-        <q-toolbar-title :padding="1">
-            Admin Menu
-        </q-toolbar-title>
-      </div>
 
-      <q-drawer-link icon="" to="/system">System</q-drawer-link>
-      <q-drawer-link icon="" to="/loads">Loads</q-drawer-link>
-
-    </q-drawer>
-
-    <!-- sub-routes -->
-    <router-view class="layout-view"></router-view>
-    
+    <!--
+      Replace following <div> with
+      <router-view /> component
+      if using subRoutes
+    -->
   </q-layout>
 </template>
 <script>
@@ -58,11 +83,13 @@ import user from 'src/users'
 
 import {
   Toast,
-  dom,
-  event,
-  openURL,
+//  dom,
+//  event,
+//  openURL,
   QLayout,
   QToolbar,
+  QTooltip,
+  QTabs,
   QToolbarTitle,
   QBtn,
   QIcon,
@@ -76,12 +103,26 @@ import {
 export default {
   data () {
     return {
+      appName: 'Lighting',
+      subTitle: '645 Broadway',
       adminmode: false,
       admin: true,
       authenticated: true
     }
   },
   components: {
+    QLayout,
+    QToolbar,
+    QTooltip,
+    QTabs,
+    QToolbarTitle,
+    QBtn,
+    QIcon,
+    QList,
+    QListHeader,
+    QItem,
+    QItemSide,
+    QItemMain
   },
   computed: {
     isAuthenticated: user.authenticated,
