@@ -56,6 +56,11 @@ export default new VueRouter({
           component: loadConfig('Users')
         },
         {
+          path: '/config/backup',
+          name: 'config-backup',
+          component: loadConfig('Backup')
+        },
+        {
           path: '/switches/:filter',
           props: true,
           component: load('Switches')
