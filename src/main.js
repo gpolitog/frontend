@@ -11,8 +11,56 @@ require(`quasar/dist/quasar.${__THEME}.css`)
 // require(`quasar/dist/quasar.ie.${__THEME}.css`)
 
 import Vue from 'vue'
-import Quasar from 'quasar'
-Vue.use(Quasar) // Install Quasar Framework
+// import Quasar from 'quasar'
+import Quasar, {
+//  dom,
+//  event,
+//  openURL,
+  QLayout,
+  QToolbar,
+  QTooltip,
+  QTab,
+  QTabs,
+  QTabPane,
+  QRouteTab,
+  QToolbarTitle,
+  QBtn,
+  QIcon,
+  QList,
+  QListHeader,
+  QSideLink,
+  QItem,
+  QItemSide,
+  QItemMain,
+  QFab,
+  QFabAction,
+  QFixedPosition
+} from 'quasar'
+
+Vue.use(Quasar, {
+  components: {
+    QLayout,
+    QToolbar,
+    QTooltip,
+    QTab,
+    QTabs,
+    QRouteTab,
+    QTabPane,
+    QToolbarTitle,
+    QBtn,
+    QIcon,
+    QList,
+    QListHeader,
+    QSideLink,
+    QItem,
+    QItemSide,
+    QItemMain,
+    QFab,
+    QFabAction,
+    QFixedPosition
+  }
+})
+// Vue.use(Quasar) // Install Quasar Framework
 
 Vue.config.productionTip = false
 
@@ -34,7 +82,7 @@ if (__THEME === 'mat') {
 }
 import 'quasar-extras/material-icons'
 // import 'quasar-extras/ionicons'
-// import 'quasar-extras/fontawesome'
+import 'quasar-extras/fontawesome'
 // import 'quasar-extras/animate'
 
 Quasar.start(() => {

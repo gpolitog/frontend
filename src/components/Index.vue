@@ -1,79 +1,89 @@
 <template>
   <q-layout
     ref="layout"
-    view="lHh Lpr fff"
+    view="Hhh lpr fff"
     :left-class="{'bg-grey-2': true}"
   >
     <q-toolbar slot="header" color="primary" class="">
       <q-btn
         flat
+        icon="menu"
         @click="$refs.layout.toggleLeft()"
-        v-show="adminmode"
+        v-show="configMode"
       >
-        <q-icon name="menu" />
+      <q-tooltip anchor="bottom middle" self="top middle" :offset="[0, 20]">
+       Configuration Options
+      </q-tooltip>
       </q-btn>
+
+    <q-btn icon="fa-key" small round @click="verifyAdmin()" v-show="isAuthenticated&&isAdmin&&!configMode"  >
+      <q-tooltip anchor="bottom middle" self="top middle" :offset="[0, 20]">
+       Enter Configuration Mode - Requires Administrator Pin
+      </q-tooltip>
+    </q-btn>
 
       <q-toolbar-title>
         {{appName}}
         <div slot="subtitle">{{subTitle}}</div>
       </q-toolbar-title>
 
-    <q-btn icon="settings" round color="primary" @click="adminMode()" v-show="isAuthenticated&&isAdmin&&!adminmode"  >
+    <q-btn icon="stop" small round @click="exitConfigMode()" v-if="configMode"  >
       <q-tooltip anchor="bottom middle" self="top middle" :offset="[0, 20]">
-       Enter Admin Mode
-      </q-tooltip>
-    </q-btn>
-
-    <q-btn icon="stop" round color="primary" @click="setAdminMode(false)" v-if="adminmode"  >
-      <q-tooltip anchor="bottom middle" self="top middle" :offset="[0, 20]">
-       Exit Admin Mode
+       Exit Configuration Mode
       </q-tooltip>
     </q-btn>
 
   </q-toolbar>
 
-    <q-tabs v-model="selectedTab">
-      <q-tab slot="title" name="tab-1" icon="message" />
-      <q-tab slot="title" name="tab-2" icon="fingerprint" />
-      <q-tab slot="title" name="tab-3" icon="account_box" />
-    </q-tabs>
+    <q-tabs slot="navigation" align="center" v-if="!configMode" color="secondary" >
+    <q-route-tab
+      default
+      icon="fa-heart"
+      to="/switches/favorites"
+      exact
+      slot="title"
+    />
+    <q-route-tab
+      label="all"
+      to="/switches/all"
+      exact
+      slot="title"
+    />
+  </q-tabs>
 
 
+  <div slot="left"  v-if="configMode">
+    <q-list no-border link inset-separator>
+      <q-list-header>System Configuration</q-list-header>
+      <q-side-link item to="/config/core">
+        <q-item-side icon="settings" />
+        <q-item-main label="Core" sublabel="Hardware/Software" />
+      </q-side-link>
+      <q-side-link item to="/config/switches">
+        <q-item-side icon="fa-toggle-on" />
+        <q-item-main label="Switches" sublabel="Physical and Virtual" />
+      </q-side-link>
+      <q-side-link item to="/config/lights">
+          <q-item-side icon="fa-lightbulb-o" />
+          <q-item-main label="Lights" sublabel="Circuits/Loads" />
+      </q-side-link>
+      <q-side-link item to="/config/users">
+          <q-item-side icon="fa-user-circle" />
+          <q-item-main label="Users" sublabel="add/edit user devices" />
+      </q-side-link>
+    </q-list>
+  </div>
 
-    <div slot="left"  v-if="adminmode">
-      <!--
-        Use <q-side-link> component 
-        instead of <q-item> for 
-        internal vue-router navigation
-      -->
+<q-fixed-position corner="bottom-right" :offset="[18, 18]">
+    <q-btn icon="fa-key" small round @click="verifyAdmin()" v-show="isAuthenticated&&isAdmin&&!configMode"  >
+      <q-tooltip anchor="bottom middle" self="top middle" :offset="[0, 20]">
+       Enter Configuration Mode - Requires Administrator Pin
+      </q-tooltip>
+    </q-btn>
+</q-fixed-position>
 
-      <q-list no-border link inset-delimiter>
-        <q-list-header>Essential Links</q-list-header>
-        <q-item @click="launch('http://quasar-framework.org')">
-          <q-item-side icon="school" />
-          <q-item-main label="Docs" sublabel="quasar-framework.org" />
-        </q-item>
-        <q-item @click="launch('http://forum.quasar-framework.org')">
-          <q-item-side icon="record_voice_over" />
-          <q-item-main label="Forum" sublabel="forum.quasar-framework.org" />
-        </q-item>
-        <q-item @click="launch('https://gitter.im/quasarframework/Lobby')">
-          <q-item-side icon="chat" />
-          <q-item-main label="Gitter Channel" sublabel="Quasar Lobby" />
-        </q-item>
-        <q-item @click="launch('https://twitter.com/quasarframework')">
-          <q-item-side icon="rss feed" />
-          <q-item-main label="Twitter" sublabel="@quasarframework" />
-        </q-item>
-      </q-list>
-    </div>
+  <router-view /> 
 
-
-    <!--
-      Replace following <div> with
-      <router-view /> component
-      if using subRoutes
-    -->
   </q-layout>
 </template>
 <script>
@@ -81,71 +91,50 @@
 // import api from 'src/api'
 import user from 'src/users'
 
-import {
-  Toast,
-//  dom,
-//  event,
-//  openURL,
-  QLayout,
-  QToolbar,
-  QTooltip,
-  QTabs,
-  QToolbarTitle,
-  QBtn,
-  QIcon,
-  QList,
-  QListHeader,
-  QItem,
-  QItemSide,
-  QItemMain
-} from 'quasar'
-
 export default {
   data () {
     return {
       appName: 'Lighting',
       subTitle: '645 Broadway',
-      adminmode: false,
+      configMode: false,
       admin: true,
-      authenticated: true
+      authenticated: true,
+      tbc: 'red'
     }
   },
   components: {
-    QLayout,
-    QToolbar,
-    QTooltip,
-    QTabs,
-    QToolbarTitle,
-    QBtn,
-    QIcon,
-    QList,
-    QListHeader,
-    QItem,
-    QItemSide,
-    QItemMain
   },
   computed: {
     isAuthenticated: user.authenticated,
-    isAdmin: user.admin
+    isAdmin: user.admin,
+    toolbarColor: _ => {
+      if (!this.$data.configMode) {
+        return 'green'
+      }
+      else {
+        return 'red-2'
+      }
+    }
   },
   methods: {
     goTo (route) {
       this.$router.push({ name: route })
     },
-    setAdminMode: user.setAdminMode,
-    confirmAdminPin: user.confirmPin,
-    adminMode: user.adminMode
+    exitConfigMode: user.exitConfigMode,
+    confirmAdminPin: user.confirmAdminPin,
+    verifyAdmin: user.verifyAdmin
   },
-  mounted () {
-    user.authenticate()
+  beforeMount () {
+    user.authenticate(this.$data.authenticated)
     .then((response) => {
-      Toast.create.positive('User Authenticated')
-      this.$router.push({ name: 'home' })
+      this.$router.push({ path: '/switches/favorites' })
     })
     .catch(_ => {
-      Toast.create.negative('See Administrator for System Access')
-      this.$router.push({ name: 'home' })
+      this.$router.push({ name: 'denied' })
     })
+  },
+  mounted () {
+    // this.$router.push({ path: '/switches/favorites' })
   },
   beforeDestroy () {
   }

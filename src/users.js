@@ -8,8 +8,13 @@ export default {
     return this.$data.authenticated
   },
 
-  authenticate: _ => {
-    return Promise.resolve('authenticated')
+  authenticate: (mode) => {
+    if (mode) {
+      return Promise.resolve()
+    }
+    else {
+      return Promise.reject()
+    }
   },
 
   admin () {
@@ -23,15 +28,14 @@ export default {
 //    return this.$data.adminmode
 //  },
 
-  setAdminMode (mode) {
-    this.$data.adminmode = mode
-    if (!this.$data.adminmode) {
-      Toast.create.positive('Exited Administrator Mode')
-    }
-    console.log('admin mode set to ', this.$data.adminmode)
+  exitConfigMode () {
+    this.$data.configMode = false
+    Toast.create.info('Exited Administrator Mode')
+    console.log('configuration mode set to ', this.$data.configMode)
+    this.$router.push({ path: '/switches/favorites' })
   },
 
-  confirmPin (pin) {
+  confirmAdminPin (pin) {
 //     return api.authenticate({
 //        strategy: 'local',
 //        password: pin     })
@@ -45,9 +49,9 @@ export default {
     }
   },
 
-  adminMode () {
+  verifyAdmin () {
     Dialog.create({
-      title: 'Enter Administrator Mode',
+      title: 'Enter Configuration Mode',
       form: {
         pin: {
           type: 'password',
@@ -61,12 +65,13 @@ export default {
           handler: (data) => {
             this.confirmAdminPin(data.pin)
             .then(_ => {
-              this.setAdminMode(true)
-              console.log('admin mode set by dialog ', this.$data.adminmode)
-              Toast.create.positive('You are now in admin mode', this.$data.adminmode)
+              this.$data.configMode = true
+              console.log('admin mode set by dialog ', this.$data.configMode)
+              Toast.create.info('You are now in configuration mode')
+              this.$router.push({ path: '/config' })
             })
             .catch(err => {
-              // this.$data.adminmode = false
+              this.$data.configMode = false
               Toast.create.negative(err, ' - Try Again')
             })
           }

@@ -7,6 +7,10 @@ function load (component) {
   return () => System.import(`components/${component}.vue`)
 }
 
+function loadConfig (component) {
+  return () => System.import(`components/config/${component}.vue`)
+}
+
 export default new VueRouter({
   /*
    * NOTE! VueRouter "history" mode DOESN'T works for Cordova builds,
@@ -27,31 +31,41 @@ export default new VueRouter({
       component: load('Index'),
       children: [
         {
-          path: '/home',
-          name: 'home',
-          component: load('Home')
+          path: '/config',
+          name: 'config',
+          component: loadConfig('Index')
         },
         {
-          path: '/admin',
-          name: 'admin',
-          component: load('Admin')
+          path: '/config/core',
+          name: 'config-core',
+          component: loadConfig('Core')
         },
         {
-          path: '/signin',
-          name: 'signin',
-          component: load('SignIn')
+          path: '/config/switches',
+          name: 'config-switches',
+          component: loadConfig('Switches')
         },
         {
-          path: '/register',
-          name: 'register',
-          component: load('SignIn')
+          path: '/config/lights',
+          name: 'config-lights',
+          component: loadConfig('Lights')
         },
         {
-          path: '/chat',
-          name: 'chat',
-          component: load('Chat')
+          path: '/config/users',
+          name: 'config-users',
+          component: loadConfig('Users')
+        },
+        {
+          path: '/switches/:filter',
+          props: true,
+          component: load('Switches')
         }
       ]
+    },
+    {
+      path: '/denied',
+      name: 'denied',
+      component: load('Denied')
     },
     {
       path: '*',
