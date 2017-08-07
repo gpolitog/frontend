@@ -12,55 +12,11 @@ require(`quasar/dist/quasar.${__THEME}.css`)
 
 import Vue from 'vue'
 // import Quasar from 'quasar'
-import Quasar, {
-//  dom,
-//  event,
-//  openURL,
-  QLayout,
-  QToolbar,
-  QTooltip,
-  QTab,
-  QTabs,
-  QTabPane,
-  QRouteTab,
-  QToolbarTitle,
-  QBtn,
-  QIcon,
-  QList,
-  QListHeader,
-  QSideLink,
-  QItem,
-  QItemSide,
-  QItemMain,
-  QFab,
-  QFabAction,
-  QFixedPosition
-} from 'quasar'
-
+import Quasar, * as All from 'quasar'
 Vue.use(Quasar, {
-  components: {
-    QLayout,
-    QToolbar,
-    QTooltip,
-    QTab,
-    QTabs,
-    QRouteTab,
-    QTabPane,
-    QToolbarTitle,
-    QBtn,
-    QIcon,
-    QList,
-    QListHeader,
-    QSideLink,
-    QItem,
-    QItemSide,
-    QItemMain,
-    QFab,
-    QFabAction,
-    QFixedPosition
-  }
+  components: All,
+  directives: All
 })
-// Vue.use(Quasar) // Install Quasar Framework
 
 Vue.config.productionTip = false
 

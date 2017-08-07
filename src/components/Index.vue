@@ -4,7 +4,7 @@
     view="Hhh lpr fff"
     :left-class="{'bg-secondary': true}"
   >
-    <q-toolbar slot="header" color="primary" class="" v-if="configMode">
+    <q-toolbar slot="header" color="primary" class="" v-if="!configMode">
       <q-btn
         flat
         icon="menu"
@@ -18,7 +18,7 @@
 
       <q-toolbar-title>
         {{appName}}
-        <div slot="subtitle">{{subTitle}}</div>
+        <!-- div slot="subtitle">{{subTitle}}</div -->
       </q-toolbar-title>
 
       <q-btn icon="stop" small color="secondary" round @click="exitConfigMode()" v-if="configMode"  >
@@ -63,7 +63,7 @@
     </q-list>
   </div>
 
- <q-tabs slot="navigation" align="center" v-if="!configMode" >
+ <q-tabs slot="navigation" align="center" v-if="configMode" >
     <q-route-tab
       default
       icon="fa-heart"
@@ -98,6 +98,23 @@
   </q-tabs>
 
 <q-fixed-position corner="bottom-right" :offset="[18, 18]">
+<q-fab
+  color="primary"
+  icon="fa-list"
+  active-icon="fa-list-alt"
+  direction="up"
+  @open="$refs.fabtp.open()"
+>
+  <q-fab-action color="secondary" @click="filterSwitches('favorites')" icon="fa-heart">
+    <q-tooltip ref="fabtp" anchor="center left" self="center right" :offset="[0, 0]">Favorites</q-tooltip>
+  </q-fab-action>
+  <q-fab-action color="secondary" @click="filterSwitches('all')" icon="fa-list-ul">
+    <q-tooltip ref="fabtp" anchor="center left" self="center right" :offset="[0, 0]">All</q-tooltip>
+  </q-fab-action>
+</q-fab>
+</q-fixed-position>
+
+<q-fixed-position corner="bottom-left" :offset="[18, 18]">
     <q-btn icon="fa-key" small round @click="verifyAdmin()" v-show="isAuthenticated&&isAdmin&&!configMode"  >
       <q-tooltip anchor="bottom middle" self="top middle" :offset="[0, 20]">
        Enter Configuration Mode - Requires Administrator Pin
@@ -117,7 +134,7 @@ import user from 'src/users'
 export default {
   data () {
     return {
-      appName: 'Lighting',
+      appName: 'Lighting - 645 Broadway',
       subTitle: '645 Broadway',
       configMode: false,
       admin: true,
@@ -140,8 +157,9 @@ export default {
     }
   },
   methods: {
-    goTo (route) {
-      this.$router.push({ name: route })
+    filterSwitches (filter) {
+      // filter = 'switches/' + filter
+      this.$router.push({ path: filter })
     },
     exitConfigMode: user.exitConfigMode,
     confirmAdminPin: user.confirmAdminPin,
@@ -165,5 +183,7 @@ export default {
 </script>
 
 <style lang="styl">
+q-toolbar-title
+  padding: .2em
 
 </style>
