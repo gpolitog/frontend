@@ -7,7 +7,7 @@
   <div v-if="filter === 'outside'">Outside and Garage</div>
   <div v-if="filter === 'all'">All Switches</div>
 
-  <q-btn rounded big @click="changeColor"  :color="btncolor">Rounded Push Button</q-btn>
+  <q-btn rounded big :class="switchColor" @click="toggleSwitch()" >Rounded Button</q-btn>
 
   <q-field icon="fa-lightbulb-o" label="Associated Lights">
     <q-select v-model="btncolor" color="primary" :options="selectOptions" @change="inputChange" />
@@ -33,27 +33,43 @@ export default {
         value: 'secondary'
       }
       ],
-      btncolor: String,
+      swon: false,
       checked: true,
       selections: ['goog']
     }
   },
-  methods: {
-    changeColor () {
-      if (this.$data.btncolor === 'primary') {
-        this.$data.btncolor = 'secondary'
+  computed: {
+    switchColor: function () {
+      console.log('computed class', this.$data.swon)
+      if (this.$data.swon) {
+        return 'switch-on'
       }
       else {
-        this.$data.btncolor = 'primary'
+        return 'switch-off'
       }
+    }
+  },
+  methods: {
+    toggleSwitch () {
+      console.log('toggling switch', this.$data.swon)
+      this.$data.swon = !this.$data.swon
     }
   },
   props: ['filter'],
   mounted () {
-    this.changeColor()
   }
 }
 </script>
 
-<style>
+<style lang="stylus">
+
+@import '~variables'
+
+.switch-on
+   background green
+   color red
+.switch-off
+   background $grey-5
+   color $grey-8
+
 </style>
