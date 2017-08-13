@@ -7,35 +7,23 @@
   <div v-if="filter === 'outside'">Outside and Garage</div>
   <div v-if="filter === 'all'">All Switches</div>
 
-  <q-btn rounded big :class="switchColor" @click="toggleSwitch()" >Rounded Button</q-btn>
+  <div v-for="aswitch in switches" >
+ <q-btn rounded big :class="switchColor" @click="toggleSwitch()" >{{aswitch.name}}</q-btn>
+  </div>
 
-  <q-field icon="fa-lightbulb-o" label="Associated Lights">
-    <q-select v-model="btncolor" color="primary" :options="selectOptions" @change="inputChange" />
-  </q-field>
+ 
 
-  <q-toggle v-model="checked" color="red" />
-
-  <q-dialog-select multiple toggle v-model="selections" :options="selectOptions" ok-label="Pick" cancel-label="Neah" title="Toggles" />
 
 </div>
 </template>
 
 <script>
+import api from 'src/api'
+
 export default {
   data () {
     return {
-      selectOptions: [{
-        label: 'Primary',
-        value: 'primary'
-      },
-      {
-        label: 'Secondary',
-        value: 'secondary'
-      }
-      ],
-      swon: false,
-      checked: true,
-      selections: ['goog']
+      switches: []
     }
   },
   computed: {
@@ -57,6 +45,20 @@ export default {
   },
   props: ['filter'],
   mounted () {
+    const switches = api.service('switches')
+    console.log('load in switch data')
+    switches.find({
+      query: { doctype: 'switch' }
+    })
+      .then((response) => {
+        this.$data.switches = response.data
+        console.log('from server', response.data[0].name)
+      })
+
+    // Add new messages to the message list
+    switches.on('updated', data => {
+      console.log('switch status updated', data)
+    })
   }
 }
 </script>
