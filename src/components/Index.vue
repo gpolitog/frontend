@@ -4,7 +4,7 @@
     view="Hhh lpr fff"
     :left-class="{'bg-secondary': true}"
   >
-    <q-toolbar slot="header" color="primary" class="" v-if="!configMode">
+    <q-toolbar slot="header" color="primary" class="" >
       <q-btn
         flat
         icon="menu"
@@ -63,41 +63,7 @@
     </q-list>
   </div>
 
- <q-tabs slot="navigation" align="center" v-if="configMode" >
-    <q-route-tab
-      default
-      icon="fa-heart"
-      to="/switches/favorites"
-      exact
-      slot="title"
-    />
-    <q-route-tab
-      label="1st"
-      to="/switches/1st"
-      exact
-      slot="title"
-    />
-    <q-route-tab
-      label="2nd"
-      to="/switches/2nd"
-      exact
-      slot="title"
-    />
-    <q-route-tab
-      label="Outside"
-      to="/switches/outside"
-      exact
-      slot="title"
-    />
-    <q-route-tab
-      label="all"
-      to="/switches/all"
-      exact
-      slot="title"
-    />
-  </q-tabs>
-
-<q-fixed-position corner="bottom-right" :offset="[18, 18]">
+<q-fixed-position corner="bottom-right" :offset="[18, 18]" v-if="!configMode">
 <q-fab
   color="primary"
   icon="fa-list"
@@ -122,7 +88,7 @@
     </q-btn>
 </q-fixed-position>
 
-  <router-view /> 
+  <router-view />
 
   </q-layout>
 </template>
@@ -130,6 +96,7 @@
 // import { Toast } from 'quasar'
 // import api from 'src/api'
 import user from 'src/users'
+import pinPad from 'src/components/helpers/pinpad.vue'
 
 export default {
   data () {
@@ -143,6 +110,7 @@ export default {
     }
   },
   components: {
+    pinPad
   },
   computed: {
     isAuthenticated: user.authenticated,

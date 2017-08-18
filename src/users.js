@@ -1,5 +1,7 @@
 // computed helper functions for checking user authentification and access
 import { Toast, Dialog } from 'quasar'
+// import { Toast } from 'quasar'
+// import Dialog from 'src/components/helpers/dialog'
 
 export default {
     //  both users and administrators
@@ -47,6 +49,37 @@ export default {
     else {
       return Promise.reject('wrong pin')
     }
+  },
+
+  verifyAdminNew () {
+    Dialog.create({
+      title: 'Enter Configuration Mode',
+      form: {
+        pin: {
+          type: 'pin',
+          label: 'Pin',
+          model: ''
+        }
+      },
+      buttons: [
+        {
+          label: 'Ok',
+          handler: (data) => {
+            this.confirmAdminPin(data.pin)
+            .then(_ => {
+              this.$data.configMode = true
+              console.log('admin mode set by dialog ', this.$data.configMode)
+              Toast.create.info('You are now in configuration mode')
+              this.$router.push({ path: '/config' })
+            })
+            .catch(err => {
+              this.$data.configMode = false
+              Toast.create.negative(err, ' - Try Again')
+            })
+          }
+        }
+      ]
+    })
   },
 
   verifyAdmin () {

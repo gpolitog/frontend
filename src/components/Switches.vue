@@ -8,17 +8,14 @@
   <div v-if="filter === 'all'">All Switches</div>
 
   <div v-for="aswitch in switches" >
- <q-btn rounded big :class="switchColor" @click="toggleSwitch()" >{{aswitch.name}}</q-btn>
+ <q-btn rounded big :class="switchColor" @click="toggleSwitch(aswitch)" >{{aswitch.name}}</q-btn>
   </div>
-
- 
-
-
 </div>
 </template>
 
 <script>
 import api from 'src/api'
+const switches = api.service('switches')
 
 export default {
   data () {
@@ -28,24 +25,25 @@ export default {
   },
   computed: {
     switchColor: function () {
-      console.log('computed class', this.$data.swon)
-      if (this.$data.swon) {
-        return 'switch-on'
-      }
-      else {
-        return 'switch-off'
-      }
+      // console.log('computed class', this.aswitch.state)
+      // if (this.aswitch.state) {
+      //   return 'switch-on'
+      // }
+      // else {
+      //   return 'switch-off'
+      // }
     }
   },
   methods: {
-    toggleSwitch () {
-      console.log('toggling switch', this.$data.swon)
-      this.$data.swon = !this.$data.swon
+    toggleSwitch (aswitch) {
+      console.log('toggling switch', aswitch.name)
+      // update record on server
+      aswitch.state = !aswitch.state
     }
   },
   props: ['filter'],
   mounted () {
-    const switches = api.service('switches')
+    // const switches = api.service('switches')
     console.log('load in switch data')
     switches.find({
       query: { doctype: 'switch' }
