@@ -36,9 +36,9 @@ export default new VueRouter({
           component: loadConfig('Index')
         },
         {
-          path: '/config/core',
-          name: 'config-core',
-          component: loadConfig('Core')
+          path: '/config/hardware',
+          name: 'config-hardware',
+          component: loadConfig('Hardware')
         },
         {
           path: '/config/switches',

@@ -4,7 +4,7 @@
     view="Hhh lpr fff"
     :left-class="{'bg-secondary': true}"
   >
-    <q-toolbar slot="header" color="primary" class="" >
+    <q-toolbar slot="header" :color="toolbarColor" class="" >
       <q-btn
         flat
         icon="menu"
@@ -32,9 +32,9 @@
   <div slot="left"  v-if="configMode">
     <q-list no-border link inset-separator>
       <q-list-header>System Configuration</q-list-header>
-      <q-side-link item to="/config/core">
+      <q-side-link item to="/config/hardware">
         <q-item-side icon="settings" />
-        <q-item-main label="Core" sublabel="Hardware/Software" />
+        <q-item-main label="Hardware" sublabel="Real-time Controlled Hardware" />
       </q-side-link>
       <q-side-link item to="/config/switches">
         <q-item-side icon="fa-toggle-on" />
@@ -103,7 +103,7 @@ export default {
     return {
       appName: 'Lighting - 645 Broadway',
       subTitle: '645 Broadway',
-      configMode: false,
+      configMode: true,
       admin: true,
       authenticated: true,
       tbc: 'red'
@@ -115,12 +115,13 @@ export default {
   computed: {
     isAuthenticated: user.authenticated,
     isAdmin: user.admin,
-    toolbarColor: _ => {
-      if (!this.$data.configMode) {
-        return 'green'
+    toolbarColor: function () {
+      console.log('toolbar configmode', this.configMode)
+      if (!this.configMode) {
+        return 'primary'
       }
       else {
-        return 'red-2'
+        return 'negative'
       }
     }
   },

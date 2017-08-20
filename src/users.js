@@ -33,7 +33,7 @@ export default {
   exitConfigMode () {
     this.$data.configMode = false
     Toast.create.info('Exited Administrator Mode')
-    console.log('configuration mode set to ', this.$data.configMode)
+    console.log('configuration mode set to ', this.configMode)
     this.$router.push({ path: '/switches/favorites' })
   },
 
@@ -68,7 +68,7 @@ export default {
             this.confirmAdminPin(data.pin)
             .then(_ => {
               this.$data.configMode = true
-              console.log('admin mode set by dialog ', this.$data.configMode)
+              console.log('config mode set by dialog ', this.$data.configMode)
               Toast.create.info('You are now in configuration mode')
               this.$router.push({ path: '/config' })
             })
@@ -99,7 +99,7 @@ export default {
             this.confirmAdminPin(data.pin)
             .then(_ => {
               this.$data.configMode = true
-              console.log('admin mode set by dialog ', this.$data.configMode)
+              console.log('admin mode set by dialog ', this.configMode)
               Toast.create.info('You are now in configuration mode')
               this.$router.push({ path: '/config' })
             })
