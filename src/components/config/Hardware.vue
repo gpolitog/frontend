@@ -1,44 +1,42 @@
 <template>
-  <div>Hardware Configuration
-
+  <div>
+    <div class="row">
+      <h4>Devices</h4>
+      <q-btn icon="fa-plus" small color="secondary" round @click="addDevice('Add a Hardware Device')">
+      <q-tooltip anchor="bottom middle" self="top middle" :offset="[0, 20]">
+       Add A Device
+      </q-tooltip>
+    </q-btn>
+    </div>
 
     <q-list>
     <div v-for="(device, index) in devices">
-      <q-collapsible :class="isOpened(index)" @open="opened(index)" @close="closed(index)" v-on:remove v-on:add :label="device.name">
-        <div>
-
-<hardware-details class="" :pDevice="device"></hardware-details>
-
-<q-btn color="positive" @click="updateDevice(device,index)">Update Device</q-btn>
-<q-btn color="negative" @click="removeDevice(device,index)">Delete Device</q-btn>
-        </div>
+      <!-- q-collapsible :class="isOpened(index)" @open="opened(index)" @close="closed(index)" v-on:remove v-on:add :label="device.name" -->
+      <q-collapsible v-on:remove v-on:add :label="device.name">
+      <hardware-details class="" :pDevice="device"></hardware-details>
+      <q-btn color="negative" @click="removeDevice(device,index)">Delete Device</q-btn>
       </q-collapsible>
     </div>
     </q-list>
 
-    <q-fixed-position corner="bottom-right" :offset="[18, 18]" >
-    <q-fab
-      color="primary"
-      icon="fa-plus"
-      direction="up"
-    >
-      <q-fab-action color="secondary" @click="addDevice('Add a Hardware Device')" icon="fa-plus">
-        <q-tooltip anchor="center left" self="center right" :offset="[0, 0]">Add a Hardware Device</q-tooltip>
-      </q-fab-action>
-      <q-fab-action color="secondary" @click="addDeviceType()" icon="fa-plus">
-        <q-tooltip anchor="center left" self="center right" :offset="[0, 0]">Add a Hardware Device Type</q-tooltip>
-      </q-fab-action>
-    </q-fab>
-    </q-fixed-position>
-
-
-<!-- q-fixed-position corner="bottom-right" :offset="[18, 18]">
-    <q-btn icon="fa-plus" small round @click="addDevice('Hardware Device')" >
+    <div class="row">
+      <h4>Device Types</h4>
+      <q-btn icon="fa-plus" small color="secondary" round @click="addDeviceType('Add a Hardware Device Type')">
       <q-tooltip anchor="bottom middle" self="top middle" :offset="[0, 20]">
-       Add a hardware device/board
+       Add A Device Type
       </q-tooltip>
     </q-btn>
-</q-fixed-position -->
+    </div>
+    <q-list>
+    <div v-for="(type, index) in types">
+      <!-- q-collapsible :class="isOpened(index)" @open="opened(index)" @close="closed(index)" v-on:remove v-on:add :label="type.name" -->
+      <q-collapsible  v-on:remove v-on:add :label="type.name">
+        {{ type }}
+      <q-btn color="positive" @click="updateDevice(type,index)">Update Type</q-btn>
+      <q-btn color="negative" @click="removeType(type,index)">Delete Type</q-btn>
+      </q-collapsible>
+    </div>
+    </q-list>
 
    </div>
 </template>
@@ -54,22 +52,26 @@ export default {
   data () {
     return {
       'devices': [],
+      'types': [],
       'isOpen': []
     }
   },
   methods: {
     addDevice (text) {
-      db.newDocument.bind(hardware)(text)
-      // this.$data.devices.push({'name': 'test'})
+      db.newDocument.bind(hardware)(text, 'device')
+    },
+    addDeviceType (text) {
+      db.newDocument.bind(hardware)(text, 'type')
     },
     removeDevice (device, index) {
       console.log('removing device', device.name)
       hardware.remove(device._id)
       this.$data.devices.splice(index, 1)
     },
-    hardwareupdate () {
-      console.log('data to write', this.$data.curr)
-      hardware.patch(this.$data.curr._id, this.$data.curr)
+    removeType (type, index) {
+      console.log('removing device', type.name)
+      hardware.remove(type._id)
+      this.$data.types.splice(index, 1)
     },
     opened (index) {
       console.log('item opened', index)
@@ -95,20 +97,42 @@ export default {
   mounted () {
     // const switches = api.service('switches')
     console.log('load in boards')
+
+    // load devices
     hardware.find({
-      paginate: false
+      paginate: false,
+      query: { doctype: 'device' }
     })
       .then((response) => {
         this.$data.devices = response.data
-        console.log('find from server', response.data)
+        console.log('loaded devices', response.data)
       })
       .catch((err) => {
         console.log('find error', err)
       })
 
-    hardware.on('created', device => {
-      console.log('a device was added now update list', device)
-      this.$data.devices.push(device)
+      // load device types
+    hardware.find({
+      paginate: false,
+      query: { doctype: 'type' }
+    })
+        .then((response) => {
+          this.$data.types = response.data
+          console.log('loaded types', response.data)
+        })
+        .catch((err) => {
+          console.log('find error', err)
+        })
+
+    hardware.on('created', doc => {
+      if (doc.doctype === 'device') {
+        console.log('a device was added now update list')
+        this.$data.devices.push(doc)
+      }
+      if (doc.doctype === 'type') {
+        console.log('a device type was added now update list')
+        this.$data.types.push(doc)
+      }
     })
   }
 }

@@ -2,9 +2,9 @@ import { Toast, Dialog } from 'quasar'
 
 export default {
 
-  newDocument (text) {
+  newDocument (text, doctype) {
     Dialog.create({
-      title: `Create New Document in DB ${text}`,
+      title: text ? `${text}` : 'Add a database item',
       form: {
         name: {
           type: 'text',
@@ -16,7 +16,8 @@ export default {
         {
           label: 'create',
           handler: (data) => {
-            this.create({'name': data.name})
+            data.doctype = doctype
+            this.create({'name': data.name, 'doctype': data.doctype})
           .then(response => {
             console.log('created document record ', response._id)
             Toast.create.positive('new entry created')
