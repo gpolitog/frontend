@@ -16,7 +16,7 @@
     "feathers-hooks": "^2.0.2",
     "feathers-socketio": "^2.0.0",
     "quasar-extras": "0.x",
-    "quasar-framework": "git+https://git@github.com/quasarframework/quasar-edge.git",
+    "quasar-framework": "^0.14.2",
     "socket.io-client": "^2.0.3",
     "vue": "~2.3.0",
     "vue-router": "^2.0.0",

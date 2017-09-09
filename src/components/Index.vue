@@ -20,7 +20,6 @@
         {{appName}}
         <!-- div slot="subtitle">{{subTitle}}</div -->
       </q-toolbar-title>
-
       <q-btn icon="stop" small color="secondary" round @click="exitConfigMode()" v-if="configMode"  >
       <q-tooltip anchor="bottom middle" self="top middle" :offset="[0, 20]">
        Exit Configuration Mode
