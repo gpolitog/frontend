@@ -18,28 +18,19 @@
       </q-tooltip>
     </q-btn>
       <q-collapsible class="col-11" v-on:remove v-on:add :label="device.name">
-      <!-- <hardware-details class="" :pDevice="device"></hardware-details> -->
-      <q-btn color="positive" @click="updateDevice(device,index)">Update Device</q-btn>
+        <q-field label="Device Name">
+         <q-input  v-model="device.name"/>
+        </q-field>
+        <q-field label="Type">
+         <q-select v-model="device.type" :options="deviceTypesOptions()" />
+        </q-field>
+        <q-field label="Description">
+          <q-input  v-model="device.desc"/>
+        </q-field>
+        <hardware-details class="" :pDevice="device"></hardware-details>
+        <q-btn color="positive" @click="updateDevice(device,index)">Update Device</q-btn>
       </q-collapsible>
     </div>
-    </div>
-    </q-list>
-
-    <div class="row">
-      <h4>Device Types</h4>
-      <q-btn icon="fa-plus" small color="secondary" round @click="addDeviceType('Add a Hardware Device Type')">
-      <q-tooltip anchor="bottom middle" self="top middle" :offset="[0, 20]">
-       Add A Device Type
-      </q-tooltip>
-    </q-btn>
-    </div>
-    <q-list>
-    <div v-for="(type, index) in types">
-      <!-- q-collapsible :class="isOpened(index)" @open="opened(index)" @close="closed(index)" v-on:remove v-on:add :label="type.name" -->
-      <q-collapsible  v-on:remove v-on:add :label="type.name">
-        {{ type }}
-      <q-btn color="positive" @click="updateDevice(type,index)">Update Type</q-btn>
-      </q-collapsible>
     </div>
     </q-list>
 
@@ -51,7 +42,7 @@
 import api from 'src/api'
 // import db from 'src/components/helpers/database'
 import { Toast, Dialog } from 'quasar'
-import hardwareDetails from 'src/components/config/Hardware-Details'
+import hardwareDetails from './Hardware-Details'
 const hardware = api.service('hardware')
 
 export default {
@@ -121,17 +112,14 @@ export default {
           },
           {
             label: 'Yes',
-            handler () {
+            handler: () => {
+              console.log('removing device', device.name)
+              hardware.remove(device._id)
+              this.$data.devices.splice(index, 1)
               return true
             }
           }
         ]
-      }).then(response => {
-        if (response) {
-          console.log('removing device', device.name)
-          hardware.remove(device._id)
-          this.$data.devices.splice(index, 1)
-        }
       })
     },
     deviceTypesOptions () {
@@ -165,7 +153,6 @@ export default {
     // load devices
     hardware.find({
       paginate: false
-      // query: { doctype: 'device' }
     })
       .then((response) => {
         this.$data.devices = response.data
