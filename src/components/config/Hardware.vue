@@ -27,7 +27,7 @@
         <q-field label="Description">
           <q-input  v-model="device.desc"/>
         </q-field>
-        <hardware-details class="" :pDevice="device"></hardware-details>
+        <hardware-details class="" :pDevice="[device.settings,deviceTypes[device.type].settings]"></hardware-details>
         <q-btn color="positive" @click="updateDevice(device,index)">Update Device</q-btn>
       </q-collapsible>
     </div>
