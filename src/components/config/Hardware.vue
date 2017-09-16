@@ -22,13 +22,14 @@
          <q-input  v-model="device.name"/>
         </q-field>
         <q-field label="Type">
-         <q-select v-model="device.type" :options="deviceTypesOptions()" />
+         <q-select disable v-model="device.type" :options="deviceTypesOptions()" @input="changeType(device)"/>
         </q-field>
         <q-field label="Description">
           <q-input  v-model="device.desc"/>
         </q-field>
-        <hardware-details class="" :pDevice="[device.settings,deviceTypes[device.type].settings]"></hardware-details>
-        <q-btn color="positive" @click="updateDevice(device,index)">Update Device</q-btn>
+        <q-form class="" @input="update(device,$event)" :values="device.settings" :schema="deviceTypes[device.type].settings" ></q-form>
+        <q-btn color="positive" @click="saveChanges(device,index)">Save Changes</q-btn>
+        <q-btn color="negative" @click="discardChanges(device,index)">Discard Changes</q-btn>
       </q-collapsible>
     </div>
     </div>
@@ -42,7 +43,7 @@
 import api from 'src/api'
 // import db from 'src/components/helpers/database'
 import { Toast, Dialog } from 'quasar'
-import hardwareDetails from './Hardware-Details'
+import QForm from '../helpers/Form.vue'
 const hardware = api.service('hardware')
 
 export default {
@@ -132,12 +133,34 @@ export default {
       }
       console.log('opts', opts)
       return opts
+    },
+    changeType (device) {
+      console.log('the new type is', device.type)
+      device.settings = {}
+      // initialize new settings
+ //     hardware.update(device._id, device)
+ //     hardware.get(device._id).then(data => console.log('device as saved', data))
+    },
+    saveChanges (device) {
+      hardware.update(device._id, device)
+      hardware.get(device._id).then(data => console.log('device as saved', data))
+    },
+    discardChanges (device) {
+      hardware.get(device._id).then(response => {
+        console.log('device inside then', device)
+        for (let key in device) { device[key] = response[key] }
+        console.log('changes discarded reverting to', response)
+      })
+    },
+    update (device, setting) {
+      console.log('setting from form', setting)
+      device.settings[setting.name] = setting.value
     }
   },
   computed: {
   },
   components: {
-    hardwareDetails
+    QForm
   },
   mounted () {
     // const switches = api.service('switches')
@@ -161,35 +184,6 @@ export default {
       .catch((err) => {
         console.log('find error', err)
       })
-
-      // load device types
-    // hardware.find({
-    //   paginate: false,
-    //   query: { doctype: 'type' }
-    // })
-    //     .then((response) => {
-    //       this.$data.types = response.data
-    //       console.log('loaded types', response.data)
-    //     })
-    //     .catch((err) => {
-    //       console.log('find error', err)
-    //     })
-
-    // hardware.on('created', doc => {
-    //   console.log('a device was created fetch new doc', doc)
-    //   if (doc.doctype === 'device') {
-    //     hardware.get(doc._id)
-    //        .then(response => {
-    //          console.log('fetched new doc', response)
-    //          this.$data.devices.push(doc)
-    //        })
-    //   }
-
-      // if (doc.doctype === 'type') {
-      //   console.log('a device type was added now update list')
-      //   this.$data.types.push(doc)
-      // }
-    // })
   }
 }
 </script>
