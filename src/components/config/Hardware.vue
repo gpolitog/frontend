@@ -41,7 +41,6 @@
 <script>
 
 import api from 'src/api'
-// import db from 'src/components/helpers/database'
 import { Toast, Dialog } from 'quasar'
 import QForm from '../helpers/Form.vue'
 const hardware = api.service('hardware')

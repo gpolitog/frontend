@@ -94,8 +94,8 @@
 <script>
 // import { Toast } from 'quasar'
 // import api from 'src/api'
-import user from 'src/users'
-import pinPad from 'src/components/helpers/pinpad.vue'
+import user from '../users'
+import pinPad from './helpers/Pinpad.vue'
 
 export default {
   data () {
