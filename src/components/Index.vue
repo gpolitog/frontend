@@ -39,9 +39,9 @@
         <q-item-side icon="fa-toggle-on" />
         <q-item-main label="Switches" sublabel="Physical and Virtual" />
       </q-side-link>
-      <q-side-link item to="/config/lights">
+      <q-side-link item to="/config/circuits">
           <q-item-side icon="fa-lightbulb-o" />
-          <q-item-main label="Lights" sublabel="Circuits/Loads" />
+          <q-item-main label="Circuits" sublabel="Lights/Outlets" />
       </q-side-link>
       <q-side-link item to="/config/access">
           <q-item-side icon="fa-tablet" />

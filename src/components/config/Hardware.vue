@@ -13,7 +13,7 @@
     <div v-for="(device, index) in devices">
     <div class="row no-wrap q-collapsible">
     </q-btn>
-      <q-collapsible class="col-11" v-on:remove v-on:add :label="device.name">
+      <q-collapsible class="" v-on:remove v-on:add :label="device.name">
         <q-field label="Device Name">
           <q-input  v-model="device.name" @blur="nameUnique(device, index)"/>
           <q-tooltip anchor="bottom middle" self="top middle" :offset="[0, 20]">
@@ -102,13 +102,16 @@ export default {
             color: 'positive',
             handler: (data) => {
               console.log('dialog data', data)
-              // could initialize all the settings instead of writing to server with hook
+              // could initialize all the settings instead of writing to server with init hook
               hardware.create({'name': data.name, 'desc': data.desc, 'type': data.type})
                .then(response => {
                  console.log('created document id= ', response._id)
                  this.$data.devices.push(response)
                  Toast.create.positive('new entry created')
                  return response._id
+               })
+               .catch((err) => {
+                 console.log('find error', err)
                })
             }
           },

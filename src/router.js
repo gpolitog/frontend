@@ -46,9 +46,9 @@ export default new VueRouter({
           component: loadConfig('Switches')
         },
         {
-          path: '/config/lights',
-          name: 'config-lights',
-          component: loadConfig('Lights')
+          path: '/config/circuits',
+          name: 'config-circuits',
+          component: loadConfig('Circuits')
         },
         {
           path: '/config/users',
