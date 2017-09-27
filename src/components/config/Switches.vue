@@ -13,42 +13,22 @@
   <q-tab name="physical"  label="Physical"  slot="title" />
   <q-tab name="virtual" label="Virtual" slot="title" />
   <q-tab name="views" label="Views" slot="title" />
-  <q-tab-pane name="physical">Tab One</q-tab-pane>
+ 
+  <q-tab-pane name="physical">
+   Physical 
+   <q-list> 
+     <div class="row no-wrap" v-for="(item, index) in physical">
+      <q-formc class="col-12" :item="item" :schema="schema.physical" :saved="saved" @save="saveChanges"></q-formc>
+     </div>
+   </q-list>
+  </q-tab-pane>
+
   <q-tab-pane name="virtual" >Tab Two</q-tab-pane>
   <q-tab-pane name="views" >Tab Three</q-tab-pane>
 </q-tabs>
 
 
-    <q-list>
-    <div class="row no-wrap"  v-for="(item, index) in items">
-      
-      <q-collapsible class="col-8 offset-2"  v-on:remove v-on:add :label="item.name">
-
-        <q-form class="" @input="update(item,$event)" :values="item" :schema="schema[item.type]"></q-form>
-
-      <q-btn color="positive" :disable="!changed" icon="fa-save" @click="saveChanges(item,index)">Save Changes
-        <q-tooltip anchor="bottom middle" self="top middle" :offset="[0, 20]">
-         Save Changes to Server
-        </q-tooltip>   
-      </q-btn>
-      <q-btn color="warning" :disable="!changed" icon="fa-trash-o" @click="discardChanges(item,index)">Discard Changes
-        <q-tooltip anchor="bottom middle" self="top middle" :offset="[0, 20]">
-         Revert to last saved changes
-        </q-tooltip>   
-      </q-btn>
-      <q-btn color= "negative" icon="fa-close" @click="remove(item,index)">Delete {{itemName}}
-        <q-tooltip anchor="bottom middle" self="top middle" :offset="[0, 20]">
-         Delete This {{itemName}}
-        </q-tooltip>       
-      </q-btn>
-      </q-collapsible>
-        <q-btn class="col-2" v-if="item.type === 'virtual'":class= "state(item)" @click="toggle(item,index)">Test
-        <q-tooltip anchor="bottom middle" self="top middle" :offset="[0, 20]">
-         Test Switch
-        </q-tooltip>  
-        </q-btn>
-    </div>
-    </q-list>
+ 
 
    </div>
 </template>
@@ -57,20 +37,27 @@
 
 import api from 'src/api'
 import { Toast, Dialog } from 'quasar'
-import QForm from '../helpers/Form.vue'
+// import QForm from '../helpers/Form.vue'
+import QFormc from '../helpers/CollapsibleForm.vue'
 const switches = api.service('switches')
-
 const hardware = api.service('hardware')
 const circuits = api.service('circuits')
 
 export default {
   data () {
     return {
-      items: [],
+      physical: [],
+      items: {},
       itemName: 'switch',
       schema: {},
-      changed: false
+      service: switches,
+      saved: true
     }
+  },
+  computed: {
+  },
+  components: {
+    QFormc
   },
   methods: {
     add () {
@@ -87,7 +74,11 @@ export default {
           },
           type: {
             type: 'radio',
-            items: [ { label: 'Physical', value: 'physical' }, { label: 'Virtual', value: 'virtual' } ],
+            items: [
+              { label: 'Physical', value: 'physical' },
+              { label: 'Virtual', value: 'virtual' },
+              { label: 'View', value: 'view' }
+            ],
             model: ''
           }
         },
@@ -99,8 +90,8 @@ export default {
               switches.create({ 'name': data.name, type: data.type })
                .then(response => {
                  console.log('created document id= ', response._id)
-                 this.$data.items.push(response)
-                 Toast.create.positive(`new ${this.$data.itemName} created, now edit and save`)
+                 this.$data.items[data.type].push(response)
+                 Toast.create.positive(`${data.type} ${this.$data.itemName} created, now edit and save`)
                  return response._id
                })
                .catch((err) => {
@@ -118,62 +109,26 @@ export default {
         ]
       })
     },
-    remove (item, index) {
-      Dialog.create({
-        title: 'Confirm',
-        message: `Do you want to delete ${item.name}?`,
-        buttons: [
-          {
-            label: 'No',
-            handler () {
-              return false
-            }
-          },
-          {
-            label: 'Yes',
-            handler: () => {
-              console.log('removing..', item.name)
-              switches.remove(item._id)
-                .then(() => {
-                  this.$data.items.splice(index, 1)
-                  Toast.create.positive(`${item.name} is removed`)
-                  return true
-                })
-            }
-          }
-        ]
-      })
-    },
     saveChanges (item) {
       // before update have hook check is name is unique
-      // only really need to update keys that have changed
-      switches.update(item._id, item)
+      // only really need to update keys that have changed using patch
+      this.service.update(item._id, item)
         .then(() => {
           Toast.create.positive('changes saved')
-          this.$data.changed = false
+          this.$data.saved = true
         })
-    },
-    discardChanges (item) {
-      switches.get(item._id).then(response => {
-        // console.log('device inside then', device)
-        for (let key in item) { item[key] = response[key] }
-        Toast.create.positive('reverted to last saved')
-        console.log('changes discarded reverting to', response)
-        this.changed = false
-      })
-    },
-    update (circuit, setting) {
-      // console.log('setting from form', setting)
-      circuit[setting.name] = setting.value
-      this.$data.changed = true
-    },
-    nameUnique (device, index) {
-      //  do unique checking on loaded names
-      Toast.create.negative('Need to Check for Unique Name')
     },
     state (item) {
       if (item.on) { return 'on' }
       else { return 'off' }
+    },
+    itemsByType (type) {
+      console.log('items by type', type, this.$data.items[type])
+      return this.$data.items[type][0]
+    },
+    schemaByType (type) {
+      console.log('schema by type', type, this.$data.schema[type])
+      return this.$data.schema[type]
     },
     toggle (item) {
 //      let state = !item.on
@@ -216,42 +171,48 @@ export default {
         .catch((err) => {
           console.log('error getting circuits for options', err)
         })
+    },
+    getSwitches (type) {
+      switches.find({
+        query: {
+          type: type
+        },
+        paginate: false
+      })
+        .then((response) => {
+          this.$data.items[type] = response.data
+          if (type === 'physical') { this.$data.physical = response.data }
+          console.log(type, ' switches loaded ', this.$data.items[type])
+        })
+        .catch((err) => {
+          console.log('error loading switches from server', err)
+        })
     }
   },
-  components: {
-    QForm
-  },
-  created () {
-    // const switches = api.service('switches')
+  beforeMount () {
+//    this.$data.items.physical = []
+//    this.$data.items.virtual = []
+//    this.$data.items.view = []
+//    this.$data.schema.physical = {}
+//    this.$data.schema.virtual = {}
+//    this.$data.schema.view = {}
 
     switches.get('schemas')
-    .then((schema) => {
-      console.log('loaded switch schemas', schema)
-      this.$data.schema = schema
-      // adds device relay banks to schema options at mount
-      // if keeping component in memory will need to listen for changes to hardware
-      this.switchBanksOptions()
-      this.circuitsOptions()
-    })
-    .catch((err) => {
-      console.log('error loading schema from server', err)
-    })
-
-    // load switches
-    switches.find({
-      query: {
-        $sort: {
-          type: -1
+      .then((schema) => {
+        console.log('loaded switch schemas', schema)
+        this.$data.schema = schema
+        // adds device relay banks to schema options at mount
+        // if keeping component in memory will need to listen for changes to hardware
+        for (let type in this.$data.schema) {
+          console.log(`loading switch type`, type)
+          this.items[type] = []
+          this.getSwitches(type)
         }
-      },
-      paginate: false
-    })
-      .then((response) => {
-        this.$data.items = response.data
-        console.log('switches loaded', response.data)
+        this.switchBanksOptions()
+        this.circuitsOptions()
       })
       .catch((err) => {
-        console.log('error loading switches from server', err)
+        console.log('error loading schema from server', err)
       })
   }
 }
