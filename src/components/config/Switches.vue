@@ -9,28 +9,25 @@
     </q-btn>
     </div>
 
-<q-tabs inverted two-lines>
-  <q-tab name="physical"  label="Physical"  slot="title" />
-  <q-tab name="virtual" label="Virtual" slot="title" />
-  <q-tab name="views" label="Views" slot="title" />
- 
-  <q-tab-pane name="physical">
-   Physical 
-   <q-list> 
-     <div class="row no-wrap" v-for="(item, index) in physical">
-      <q-formc class="col-12" :item="item" :schema="schema.physical" :saved="saved" @save="saveChanges"></q-formc>
-     </div>
-   </q-list>
-  </q-tab-pane>
-
-  <q-tab-pane name="virtual" >Tab Two</q-tab-pane>
-  <q-tab-pane name="views" >Tab Three</q-tab-pane>
+<q-tabs color="secondary" v-if="ready"  inverted >
+  <div v-for="type in Object.keys(schema)">
+    <q-tab :name="type"  :label="type"  slot="title" />
+     <q-tab-pane :name="type">
+       <q-list>
+         <div class="row" v-for="(item, index) in items[type]">
+           <q-formc class="col-11" :item="item" :schema="schema[type]" @changed="saved=false" :saved="saved" @save="saveChanges"></q-formc>
+           <q-btn class="col-1" color= "warning" icon="fa-close" @click="remove(item,index)">
+             <q-tooltip anchor="bottom middle" self="top middle" :offset="[0, 20]">
+              Delete {{ itemName }} - {{ item.name }}
+             </q-tooltip>
+           </q-btn>
+         </div>
+       </q-list>
+     </q-tab-pane>
+   </div>
 </q-tabs>
 
-
- 
-
-   </div>
+</div>
 </template>
 
 <script>
@@ -46,15 +43,12 @@ const circuits = api.service('circuits')
 export default {
   data () {
     return {
-      physical: [],
       items: {},
       itemName: 'switch',
       schema: {},
-      service: switches,
-      saved: true
+      saved: true,
+      ready: false
     }
-  },
-  computed: {
   },
   components: {
     QFormc
@@ -109,10 +103,38 @@ export default {
         ]
       })
     },
+    remove (item, index) {
+      Dialog.create({
+        title: 'Confirm',
+        message: `Do you want to delete ${item.name} - ${item.type}?`,
+        buttons: [
+          {
+            label: 'No',
+            handler () {
+              return false
+            }
+          },
+          {
+            label: 'Yes',
+            handler: () => {
+              console.log('removing..', item.name)
+              switches.remove(item._id)
+                .then(() => {
+                  console.log('after', this.$data.items[item.type])
+                  this.$data.items[item.type].splice(index, 1)
+                  console.log('after', this.$data.items[item.type])
+                  Toast.create.positive(`${item.name} is removed`)
+                  return true
+                })
+            }
+          }
+        ]
+      })
+    },
     saveChanges (item) {
       // before update have hook check is name is unique
       // only really need to update keys that have changed using patch
-      this.service.update(item._id, item)
+      switches.update(item._id, item)
         .then(() => {
           Toast.create.positive('changes saved')
           this.$data.saved = true
@@ -135,8 +157,16 @@ export default {
       console.log('Toggling state for ', item.name)
 //   circuits.patch(item._id, { on: state })
     },
+    viewsOptions () {
+      let option = {}
+      for (let view in this.$data.items.view) {
+        option = {label: view.name, value: view.name}
+        this.$data.schema.virtual.views.fieldProps.options.push(option)
+      }
+      console.log('view options', this.$data.schema.virtual.views.fieldProps.options)
+    },
     switchBanksOptions () {
-      hardware.find({
+      return hardware.find({
         paginate: false,
         query: { category: 'switch', $select: [ '_id', 'name' ] }
       })
@@ -154,7 +184,7 @@ export default {
         })
     },
     circuitsOptions () {
-      circuits.find({
+      return circuits.find({
         paginate: false,
         query: { $select: [ '_id', 'name' ] }
       })
@@ -173,7 +203,7 @@ export default {
         })
     },
     getSwitches (type) {
-      switches.find({
+      return switches.find({
         query: {
           type: type
         },
@@ -181,7 +211,6 @@ export default {
       })
         .then((response) => {
           this.$data.items[type] = response.data
-          if (type === 'physical') { this.$data.physical = response.data }
           console.log(type, ' switches loaded ', this.$data.items[type])
         })
         .catch((err) => {
@@ -190,26 +219,24 @@ export default {
     }
   },
   beforeMount () {
-//    this.$data.items.physical = []
-//    this.$data.items.virtual = []
-//    this.$data.items.view = []
-//    this.$data.schema.physical = {}
-//    this.$data.schema.virtual = {}
-//    this.$data.schema.view = {}
-
     switches.get('schemas')
       .then((schema) => {
         console.log('loaded switch schemas', schema)
         this.$data.schema = schema
         // adds device relay banks to schema options at mount
         // if keeping component in memory will need to listen for changes to hardware
-        for (let type in this.$data.schema) {
-          console.log(`loading switch type`, type)
-          this.items[type] = []
-          this.getSwitches(type)
-        }
-        this.switchBanksOptions()
-        this.circuitsOptions()
+        let getData = Object.keys(this.$data.schema).map(this.getSwitches)
+        getData.push(this.switchBanksOptions())
+        getData.push(this.circuitsOptions())
+        Promise.all(getData)
+          .then(() => {
+            this.viewsOptions()
+            console.log('ready to render tabs')
+            this.$data.ready = true
+          })
+          .catch((err) => {
+            console.log('error loading switch data from server', err)
+          })
       })
       .catch((err) => {
         console.log('error loading schema from server', err)
@@ -230,7 +257,7 @@ export default {
     background red
     color white
 
-.q-collapsible-sub-item 
+.q-collapsible-sub-item
   background $tertiary
   color white
 
@@ -248,7 +275,7 @@ export default {
    background $blue-10
 
 // dialog inputs
-.modal 
+.modal
   .q-input-target
     color black
     background white

@@ -46,11 +46,10 @@ export default {
     // const switches = api.service('switches')
     console.log('load in switch data')
     switches.find({
-      query: { doctype: 'switch' }
+      query: { type: 'virtual' }
     })
       .then((response) => {
         this.$data.switches = response.data
-        console.log('from server', response.data[0].name)
       })
 
     // Add new messages to the message list
