@@ -16,7 +16,7 @@ export default {
       let form = []
       // console.log('values', this.values)
       for (let key in this.schema) {
-        // here is where one could init keys instead of in back end
+        // console.log('form schema key on render', key)
         if (this.schema[key].fieldType !== 'hidden') {
           let field =
           element('q-field', {
@@ -26,10 +26,12 @@ export default {
           }, [
             element(this.schema[key].fieldType ? `q-${this.schema[key].fieldType}` : 'q-input', {
               props: this.fieldProps(this.values[key], this.schema[key]),
-              on: { input: (value) => {
-                this.values[key] = value
-                this.$emit('input', { name: key, value: value })
-              }
+              on: {
+                input: (value) => {
+                  // this.values[key] = value
+                  // console.log('input changed', key, value)
+                  this.$emit('changed', { name: key, value: value })
+                }
               }
             }),
             this.tooltip(this.schema[key].fieldProps.tip, element)

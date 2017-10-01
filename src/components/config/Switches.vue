@@ -14,8 +14,8 @@
     <q-tab :name="type"  :label="type"  slot="title" />
      <q-tab-pane :name="type">
        <q-list>
-         <div class="row" v-for="(item, index) in items[type]">
-           <q-formc class="col-11" :item="item" :schema="schema[type]" @changed="saved=false" :saved="saved" @save="saveChanges"></q-formc>
+         <div class="row" v-for="(item, index) in $data[type]">
+           <q-formc class="col-11" :item="item" :schema="schema[type]" @changed="updateItem" :saved="saved" @save="saveChanges" @reset="reset"></q-formc>
            <q-btn class="col-1" color= "warning" icon="fa-close" @click="remove(item,index)">
              <q-tooltip anchor="bottom middle" self="top middle" :offset="[0, 20]">
               Delete {{ itemName }} - {{ item.name }}
@@ -44,6 +44,9 @@ export default {
   data () {
     return {
       items: {},
+      physical: [],
+      virtual: [],
+      view: [],
       itemName: 'switch',
       schema: {},
       saved: true,
@@ -83,9 +86,18 @@ export default {
             handler: (data) => {
               switches.create({ 'name': data.name, type: data.type })
                .then(response => {
-                 console.log('created document id= ', response._id)
-                 this.$data.items[data.type].push(response)
-                 Toast.create.positive(`${data.type} ${this.$data.itemName} created, now edit and save`)
+                 // let typeItems = Array.from(this.$data.items[data.type])
+                 // typeItems.push(response)
+                 // console.log('typeitems', typeItems)
+                 // console.log('created document id= ', response._id)
+                 // console.log(this.$data.items[data.type], this.$data.items[data.type].length)
+                 // console.log('last before add', this.$data.items[data.type][this.$data.items[data.type].length - 1])
+                 // this.$set(this.$data.items, data.type, typeItems)
+                 this.$data[data.type].push(response)
+                 if (data.type === 'view') { this.viewsOptions(response, 'add') }
+                 // console.log('after add', this.$data.items[data.type], this.$data.items[data.type].length)
+                 // console.log('last after add', this.$data.items[data.type][this.$data.items[data.type].length - 1])
+                 Toast.create.positive(`${data.type} ${this.$data.itemName} {response.name} created, now edit and save`)
                  return response._id
                })
                .catch((err) => {
@@ -120,9 +132,9 @@ export default {
               console.log('removing..', item.name)
               switches.remove(item._id)
                 .then(() => {
-                  console.log('after', this.$data.items[item.type])
-                  this.$data.items[item.type].splice(index, 1)
-                  console.log('after', this.$data.items[item.type])
+                  // this.$data.items[item.type].splice(index, 1)
+                  this.$data[item.type].splice(index, 1)
+                  if (item.type === 'view') { this.viewsOptions(item, 'remove') }
                   Toast.create.positive(`${item.name} is removed`)
                   return true
                 })
@@ -131,39 +143,90 @@ export default {
         ]
       })
     },
+    updateItem (update) {
+      for (let index in this.$data[update.type]) {
+        if (this.$data[update.type][index]._id === update.id) {
+          this.$data[update.type][index][update.setting.name] = update.setting.value
+          // console.log('form field update', update.setting.name, this.$data[update.type][index][update.setting.name])
+          this.$data.saved = false
+          return
+        }
+      }
+    },
     saveChanges (item) {
       // before update have hook check is name is unique
       // only really need to update keys that have changed using patch
       switches.update(item._id, item)
         .then(() => {
+          if (item.type === 'view') { this.viewsOptions(item, 'update') }
           Toast.create.positive('changes saved')
           this.$data.saved = true
         })
     },
+    reset (item) {
+      switches.get(item._id)
+        .then((response) => {
+          for (let index in this.$data[item.type]) {
+            if (this.$data[item.type][index]._id === item._id) {
+              // console.log(this.$data[item.type], item._id, index, response)
+              for (let key in this.$data[item.type][index]) { this.$data[item.type][index][key] = response[key] }
+              Toast.create.positive(`reverted to last saved for ${this.$data[item.type][index].name}`)
+              this.$data.saved = true
+              return
+            }
+          }
+          Toast.create.negative('error - not able reset to last saved')
+        })
+       .catch((err) => {
+         console.log('error unable to get data from server', err)
+       })
+    },
     state (item) {
       if (item.on) { return 'on' }
       else { return 'off' }
-    },
-    itemsByType (type) {
-      console.log('items by type', type, this.$data.items[type])
-      return this.$data.items[type][0]
-    },
-    schemaByType (type) {
-      console.log('schema by type', type, this.$data.schema[type])
-      return this.$data.schema[type]
     },
     toggle (item) {
 //      let state = !item.on
       console.log('Toggling state for ', item.name)
 //   circuits.patch(item._id, { on: state })
     },
-    viewsOptions () {
-      let option = {}
-      for (let view in this.$data.items.view) {
-        option = {label: view.name, value: view.name}
-        this.$data.schema.virtual.views.fieldProps.options.push(option)
+    viewsOptions (change, mode = 'add') {
+      console.log('view options was passed', change, mode)
+      if (!change) {
+        let options = []
+        console.log('loading view options from scratch', this.$data.view)
+        let option = {}
+        for (let view in this.$data.view) {
+          option = {label: this.$data.view[view].name, value: this.$data.view[view]._id}
+          options.push(option)
+        }
+        this.$data.schema.virtual.views.fieldProps.options = options
       }
-      console.log('view options', this.$data.schema.virtual.views.fieldProps.options)
+      else {
+        switch (mode) {
+          case 'add':
+            console.log('adding a view option', change.name)
+            this.$data.schema.virtual.views.fieldProps.options.push({label: change.name, value: change._id})
+            break
+          case 'remove':
+            console.log('removing a view option', change.name)
+             // TODO dialog do you really want to delete this view (this view removed from all virtual switches
+            // go through all virtual switches removing this view and save them to server
+            // now find this view in options and remove it.
+            break
+          case 'update':
+            for (let index in this.$data.schema.virtual.views.fieldProps.options) {
+              console.log('updating a view option when', index, change._id, ' = ', this.$data.schema.virtual.views.fieldProps.options[index].value)
+              if (change._id === this.$data.schema.virtual.views.fieldProps.options[index].value) {
+                console.log('new view name', this.$data.schema.virtual.views.fieldProps.options[index].label, change.name)
+                this.$data.schema.virtual.views.fieldProps.options[index].label = change.name
+                break
+              }
+            }
+            break
+        }
+      }
+      console.log(`view options ${this.$data.schema.virtual.views.fieldProps.options}`)
     },
     switchBanksOptions () {
       return hardware.find({
@@ -210,8 +273,9 @@ export default {
         paginate: false
       })
         .then((response) => {
-          this.$data.items[type] = response.data
-          console.log(type, ' switches loaded ', this.$data.items[type])
+          this.$data[type] = response.data
+          // this.$set(this.$data, type, response.data)
+          console.log(type, ' switches loaded ', this.$data[type])
         })
         .catch((err) => {
           console.log('error loading switches from server', err)
