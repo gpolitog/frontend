@@ -14,7 +14,7 @@
     <q-tab :name="type"  :label="type"  slot="title" />
      <q-tab-pane :name="type">
        <q-list>
-         <div class="row" v-for="(item, index) in $data[type]">
+         <div class="row no-wrap" v-for="(item, index) in $data.items[type]">
            <q-formc class="col-11" :item="item" :schema="schema[type]" @changed="updateItem" :saved="saved" @save="saveChanges" @reset="reset"></q-formc>
            <q-btn class="col-1" color= "warning" icon="fa-close" @click="remove(item,index)">
              <q-tooltip anchor="bottom middle" self="top middle" :offset="[0, 20]">
@@ -44,9 +44,6 @@ export default {
   data () {
     return {
       items: {},
-      physical: [],
-      virtual: [],
-      view: [],
       itemName: 'switch',
       schema: {},
       saved: true,
@@ -86,16 +83,9 @@ export default {
             handler: (data) => {
               switches.create({ 'name': data.name, type: data.type })
                .then(response => {
-                 // let typeItems = Array.from(this.$data.items[data.type])
-                 // typeItems.push(response)
-                 // console.log('typeitems', typeItems)
-                 // console.log('created document id= ', response._id)
-                 // console.log(this.$data.items[data.type], this.$data.items[data.type].length)
                  // console.log('last before add', this.$data.items[data.type][this.$data.items[data.type].length - 1])
-                 // this.$set(this.$data.items, data.type, typeItems)
-                 this.$data[data.type].push(response)
+                 this.$data.items[data.type].push(response)
                  if (data.type === 'view') { this.viewsOptions(response, 'add') }
-                 // console.log('after add', this.$data.items[data.type], this.$data.items[data.type].length)
                  // console.log('last after add', this.$data.items[data.type][this.$data.items[data.type].length - 1])
                  Toast.create.positive(`${data.type} ${this.$data.itemName} {response.name} created, now edit and save`)
                  return response._id
@@ -133,7 +123,7 @@ export default {
               switches.remove(item._id)
                 .then(() => {
                   // this.$data.items[item.type].splice(index, 1)
-                  this.$data[item.type].splice(index, 1)
+                  this.$data.items[item.type].splice(index, 1)
                   if (item.type === 'view') { this.viewsOptions(item, 'remove') }
                   Toast.create.positive(`${item.name} is removed`)
                   return true
@@ -144,10 +134,10 @@ export default {
       })
     },
     updateItem (update) {
-      for (let index in this.$data[update.type]) {
-        if (this.$data[update.type][index]._id === update.id) {
-          this.$data[update.type][index][update.setting.name] = update.setting.value
-          // console.log('form field update', update.setting.name, this.$data[update.type][index][update.setting.name])
+      for (let index in this.$data.items[update.type]) {
+        if (this.$data.items[update.type][index]._id === update.id) {
+          this.$data.items[update.type][index][update.setting.name] = update.setting.value
+          // console.log('form field update', update.setting.name, this.$data.items[update.type][index][update.setting.name])
           this.$data.saved = false
           return
         }
@@ -166,11 +156,11 @@ export default {
     reset (item) {
       switches.get(item._id)
         .then((response) => {
-          for (let index in this.$data[item.type]) {
-            if (this.$data[item.type][index]._id === item._id) {
-              // console.log(this.$data[item.type], item._id, index, response)
-              for (let key in this.$data[item.type][index]) { this.$data[item.type][index][key] = response[key] }
-              Toast.create.positive(`reverted to last saved for ${this.$data[item.type][index].name}`)
+          for (let index in this.$data.items[item.type]) {
+            if (this.$data.items[item.type][index]._id === item._id) {
+              // console.log(this.$data.items[item.type], item._id, index, response)
+              for (let key in this.$data.items[item.type][index]) { this.$data.items[item.type][index][key] = response[key] }
+              Toast.create.positive(`reverted to last saved for ${this.$data.items[item.type][index].name}`)
               this.$data.saved = true
               return
             }
@@ -194,10 +184,11 @@ export default {
       console.log('view options was passed', change, mode)
       if (!change) {
         let options = []
-        console.log('loading view options from scratch', this.$data.view)
+        let views = this.$data.items.view
+        console.log('loading view options from scratch', this.$data.items.view)
         let option = {}
-        for (let view in this.$data.view) {
-          option = {label: this.$data.view[view].name, value: this.$data.view[view]._id}
+        for (let view in views) {
+          option = {label: views[view].name, value: views[view]._id}
           options.push(option)
         }
         this.$data.schema.virtual.views.fieldProps.options = options
@@ -228,6 +219,7 @@ export default {
       }
       console.log(`view options ${this.$data.schema.virtual.views.fieldProps.options}`)
     },
+    // TODO make responsive to changes in device hardware
     switchBanksOptions () {
       return hardware.find({
         paginate: false,
@@ -246,6 +238,7 @@ export default {
           console.log('error getting switch banks for options', err)
         })
     },
+    // TODO make responsive to changes in circuits
     circuitsOptions () {
       return circuits.find({
         paginate: false,
@@ -273,12 +266,12 @@ export default {
         paginate: false
       })
         .then((response) => {
-          this.$data[type] = response.data
-          // this.$set(this.$data, type, response.data)
-          console.log(type, ' switches loaded ', this.$data[type])
+          // this.$data.items[type] = response.data
+          this.$set(this.items, type, response.data)
+          console.log(type, ' switches loaded ', this.$data.items[type])
         })
         .catch((err) => {
-          console.log('error loading switches from server', err)
+          console.log(type, 'error loading switches from server', err)
         })
     }
   },

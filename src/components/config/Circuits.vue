@@ -207,7 +207,8 @@ export default {
       .catch((err) => {
         console.log('error loading circuits from server', err)
       })
-
+    // server service emits stateChange event whenever change of state is written
+    // all clients should listen for this
     circuits.on('stateChange', resp => {
       let circuit = resp.data
       console.log(`Updating circuit ${circuit.name}s state in component with ${this.state(circuit)}`)

@@ -34,7 +34,7 @@ export default {
     this.$data.configMode = false
     Toast.create.info('Exited Administrator Mode')
     console.log('configuration mode set to ', this.configMode)
-    this.$router.push({ path: '/switches/favorites' })
+    this.$router.push({ path: '/switches' })
   },
 
   confirmAdminPin (pin) {

@@ -43,9 +43,9 @@
           <q-item-side icon="fa-lightbulb-o" />
           <q-item-main label="Circuits" sublabel="Lights/Outlets" />
       </q-side-link>
-      <q-side-link item to="/config/access">
+      <q-side-link item to="/config/security">
           <q-item-side icon="fa-tablet" />
-          <q-item-main label="Access" sublabel="system access devices" />
+          <q-item-main label="Security" sublabel="grant access to system" />
       </q-side-link>
       <q-side-link item to="/config/backup" >
           <q-item-side icon="fa-save" />
@@ -61,23 +61,6 @@
       </q-item>
     </q-list>
   </div>
-
-<q-fixed-position corner="bottom-right" :offset="[18, 18]" v-if="!configMode">
-<q-fab
-  color="primary"
-  icon="fa-list"
-  active-icon="fa-list-alt"
-  direction="up"
-  @open="$refs.fabtp.open()"
->
-  <q-fab-action color="secondary" @click="filterSwitches('favorites')" icon="fa-heart">
-    <q-tooltip ref="fabtp" anchor="center left" self="center right" :offset="[0, 0]">Favorites</q-tooltip>
-  </q-fab-action>
-  <q-fab-action color="secondary" @click="filterSwitches('all')" icon="fa-list-ul">
-    <q-tooltip ref="fabtp" anchor="center left" self="center right" :offset="[0, 0]">All</q-tooltip>
-  </q-fab-action>
-</q-fab>
-</q-fixed-position>
 
 <q-fixed-position corner="bottom-left" :offset="[18, 18]">
     <q-btn icon="fa-key" small round @click="verifyAdmin()" v-show="isAuthenticated&&isAdmin&&!configMode"  >
@@ -102,7 +85,7 @@ export default {
     return {
       appName: 'Lighting - 645 Broadway',
       subTitle: '645 Broadway',
-      configMode: true,
+      configMode: false,
       admin: true,
       authenticated: true,
       tbc: 'red'
@@ -115,7 +98,6 @@ export default {
     isAuthenticated: user.authenticated,
     isAdmin: user.admin,
     toolbarColor: function () {
-      console.log('toolbar configmode', this.configMode)
       if (!this.configMode) {
         return 'primary'
       }
@@ -136,7 +118,7 @@ export default {
   beforeMount () {
     user.authenticate(this.$data.authenticated)
     .then((response) => {
-      this.$router.push({ path: '/switches/favorites' })
+      this.$router.push({ path: '/switches' })
     })
     .catch(_ => {
       this.$router.push({ name: 'denied' })

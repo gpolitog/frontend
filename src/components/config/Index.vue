@@ -1,5 +1,5 @@
 <template>
-  <div>Configuration Infromation Home</div>
+  <div>Configuration Information Home - render a markdown file here would be good</div>
 </template>
 
 <script>

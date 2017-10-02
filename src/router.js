@@ -51,9 +51,9 @@ export default new VueRouter({
           component: loadConfig('Circuits')
         },
         {
-          path: '/config/users',
-          name: 'config-users',
-          component: loadConfig('Users')
+          path: '/config/security',
+          name: 'config-security',
+          component: loadConfig('Security')
         },
         {
           path: '/config/backup',
@@ -61,8 +61,9 @@ export default new VueRouter({
           component: loadConfig('Backup')
         },
         {
-          path: '/switches/:filter',
-          props: true,
+          path: '/switches',
+          name: 'switches',
+          // props: true,
           component: load('Switches')
         }
       ]
