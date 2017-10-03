@@ -20,13 +20,20 @@
         {{appName}}
         <!-- div slot="subtitle">{{subTitle}}</div -->
       </q-toolbar-title>
-      <q-btn icon="stop" small color="secondary" round @click="exitConfigMode()" v-if="configMode"  >
+      <q-btn icon="stop" small color="secondary" round @click="exitConfigMode()" v-show="configMode"  >
       <q-tooltip anchor="bottom middle" self="top middle" :offset="[0, 20]">
        Exit Configuration Mode
       </q-tooltip>
     </q-btn>
 
+    <q-btn class="" icon="fa-key" small round @click="verifyAdmin()" v-show="isAuthenticated&&isAdmin&&!configMode"  >
+      <q-tooltip anchor="bottom middle" self="top middle" :offset="[0, 20]">
+       Enter Configuration Mode - Requires Administrator Pin
+      </q-tooltip>
+    </q-btn>
+
   </q-toolbar>
+
 
   <div slot="left"  v-if="configMode">
     <q-list no-border link inset-separator>
@@ -61,14 +68,6 @@
       </q-item>
     </q-list>
   </div>
-
-<q-fixed-position corner="bottom-left" :offset="[18, 18]">
-    <q-btn icon="fa-key" small round @click="verifyAdmin()" v-show="isAuthenticated&&isAdmin&&!configMode"  >
-      <q-tooltip anchor="bottom middle" self="top middle" :offset="[0, 20]">
-       Enter Configuration Mode - Requires Administrator Pin
-      </q-tooltip>
-    </q-btn>
-</q-fixed-position>
 
   <router-view />
 
