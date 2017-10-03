@@ -1,14 +1,14 @@
 <template>
 <div>
-  <div class="col-12 view" >{{ findOne('_id', curView, 'name', views) }}</div>
+  <div class="col-12 view" >{{ viewName(views, curView) }}</div>
    <div class="xs-gutter" >
-  <div class="row no-wrap" v-for="aswitch in filteredSwitches()" >
-     <q-btn class="col-xs-10 col-sm-8 col-md-6 col-lg-4" icon="fa-switch" rounded :class="state(aswitch)" @click="toggle(aswitch)" >{{aswitch.name}} 
+  <div class="row no-wrap aswitch" v-for="aswitch in filteredSwitches()" >
+     <q-btn class="col-xs-8 col-sm-8 offset-md-2 col-md-6 offset-lg-4 col-lg-4" icon="fa-switch" rounded :class="state(aswitch)" @click="toggle(aswitch)" >{{aswitch.name}}
      </q-btn>
-     <q-btn class="col-1" rounded small @click="" >
+     <q-btn class="" rounded small @click="" >
        <q-icon name="fa-eye" />
        <q-tooltip anchor="bottom middle" self="top middle" :offset="[0, 20]">
-         view circuits controlled by this switch 
+         view circuits controlled by this switch
        </q-tooltip>
      </q-btn>
   </div>
@@ -16,14 +16,15 @@
 
 <q-fixed-position corner="bottom-right" :offset="[18, 18]" >
 <q-fab
+  @open="openFab()"
+  @close="closeFab()"
   color="primary"
   icon="fa-list"
   active-icon="fa-list-alt"
   direction="up"
-  @open="$refs.fabtp.open()"
 >
   <q-fab-action v-for="view in views" :key="view._id" color="secondary" @click="filter(view)" icon="fa-list">
-    <q-tooltip ref="fabtp" anchor="center left" self="center right" :offset="[0, 0]">{{ view.name }}</q-tooltip>
+    <q-tooltip ref="fabviewtp" anchor="center left" self="center right" :offset="[0, 0]">{{ view.name }}</q-tooltip>
   </q-fab-action>
 </q-fab>
 </q-fixed-position>
@@ -36,6 +37,7 @@
 // TODO m
 
 import api from 'src/api'
+import _ from 'underscore'
 const switches = api.service('switches')
 const circuits = api.service('circuits')
 
@@ -51,26 +53,15 @@ export default {
   computed: {
   },
   methods: {
-    findOne (skey, value, rkey, items) {
-      for (let item of items) {
-        // console.log('findone', item.name, skey, rkey, item[skey], value)
-        if (item[skey] === value) {
-          return item[rkey]
-        }
+    viewName (views, id) {
+      if (_.findWhere(views, { '_id': id })) {  // initial issue where renders before this is ready.
+        return _.findWhere(views, { '_id': id }).name
       }
-      return null
+      return 'Error!'
     },
     filteredSwitches () {
       if (this.curView !== 'all') {
-        let filtered = []
-        for (let aswitch of this.switches) {
-          console.log(aswitch.views, this.curView)
-          if (aswitch.views.indexOf(this.curView) !== -1) {
-            filtered.push(aswitch)
-          }
-        }
-        console.log('all and filtered', this.switches, filtered)
-        return filtered
+        return _.filter(this.switches, aswitch => { return aswitch.views.indexOf(this.curView) !== -1 })
       }
       return this.switches
     },
@@ -97,6 +88,22 @@ export default {
       }
       console.log(`the circuits for switch ${aswitch.name} are ${switchCircuits}`)
       return switchCircuits
+    },
+    openFab () {
+      if (this.$q.platform.has.touch) {
+        setTimeout(() => {
+          for (let index in this.$refs.fabviewtp) {
+            this.$refs.fabviewtp[index].open()
+          }
+        }, 300)
+      }
+    },
+    closeFab () {
+      if (this.$q.platform.has.touch) {
+        for (let index in this.$refs.fabviewtp) {
+          this.$refs.fabviewtp[index].close()
+        }
+      }
     }
   },
   // props: ['filter'],
@@ -115,7 +122,7 @@ export default {
     })
       .then((response) => {
         this.$data.views = response.data
-        this.$data.views.push({ name: 'all', _id: 'all' })
+        this.$data.views.push({ name: 'All', _id: 'all' })
         console.log('loading all switch views', this.views[this.views.length - 1])
       })
 // when should I use vuex instead of loading from server - might be better for realtime updates
@@ -154,12 +161,22 @@ export default {
 
 @import '~variables'
 
+.aswitch
+  height: 50px
+
 .bulb
   background green
 
 .view
   background $secondary
   width 100%
+  font-size 2em
+  text-transform uppercase
+  text-align center
+  font-weight bold
+  margin-bottom .2em
+  padding .1em
+
 
 .on
     background $positive
