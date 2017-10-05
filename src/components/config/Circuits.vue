@@ -10,33 +10,19 @@
     </div>
 
     <q-list>
-    <div class="row no-wrap"  v-for="(item, index) in items">
-      <q-collapsible class="col-8" v-on:remove v-on:add :label="item.name">
-
-        <q-form class="" @input="update(item,$event)" :values="item" :schema="schema"></q-form>
-
-      <q-btn color="positive" :disable="!changed" icon="fa-save" @click="saveChanges(item,index)">Save Changes
-        <q-tooltip anchor="bottom middle" self="top middle" :offset="[0, 20]">
-         Save Changes to Server
-        </q-tooltip>   
-      </q-btn>
-      <q-btn color="warning" :disable="!changed" icon="fa-trash-o" @click="discardChanges(item,index)">Discard Changes
-        <q-tooltip anchor="bottom middle" self="top middle" :offset="[0, 20]">
-         Revert to last saved changes
-        </q-tooltip>   
-      </q-btn>
-      <q-btn color= "negative" icon="fa-close" @click="remove(item,index)">Delete Circuit
-        <q-tooltip anchor="bottom middle" self="top middle" :offset="[0, 20]">
-         Delete This Circuit
-        </q-tooltip>       
-      </q-btn>
-      </q-collapsible>
-        <q-btn :class= "state(item)" @click="toggle(item,index)">Toggle Circuit
+      <div class="row no-wrap" v-for="(item, index) in $data.items">
+        <q-formc class="col-8" :item="item" :schema="schema" @changed="updateItem" :saved="saved" @save="saveChanges" @reset="reset"></q-formc>
+        <q-btn class="col-1" color= "warning" icon="fa-close" @click="remove(item,index)">
+          <q-tooltip anchor="bottom middle" self="top middle" :offset="[0, 20]">
+           Delete {{ itemName }} - {{ item.name }}
+          </q-tooltip>
+        </q-btn>
+        <q-btn class="col-3":class= "state(item)" @click="toggle(item,index)">Toggle Circuit
         <q-tooltip anchor="bottom middle" self="top middle" :offset="[0, 20]">
          Test Circuit by Turning on and off
-        </q-tooltip>  
+        </q-tooltip>
         </q-btn>
-    </div>
+      </div>
     </q-list>
 
    </div>
@@ -46,7 +32,7 @@
 
 import api from 'src/api'
 import { Toast, Dialog } from 'quasar'
-import QForm from '../helpers/Form.vue'
+import QFormc from '../helpers/CollapsibleForm.vue'
 const circuits = api.service('circuits')
 
 const hardware = api.service('hardware')
@@ -57,7 +43,8 @@ export default {
       items: [],
       itemName: 'circuit',
       schema: {},
-      changed: false
+      saved: true,
+      ready: false
     }
   },
   methods: {
@@ -129,22 +116,27 @@ export default {
       circuits.update(item._id, item)
         .then(() => {
           Toast.create.positive('changes saved')
-          this.$data.changed = false
+          this.$data.saved = true
         })
     },
-    discardChanges (item) {
+    reset (item) {
       circuits.get(item._id).then(response => {
         // console.log('device inside then', device)
         for (let key in item) { item[key] = response[key] }
         Toast.create.positive('reverted to last saved')
         console.log('changes discarded reverting to', response)
-        this.changed = false
+        this.$data.saved = true
       })
     },
-    update (circuit, setting) {
-      // console.log('setting from form', setting)
-      circuit[setting.name] = setting.value
-      this.$data.changed = true
+    updateItem (update) {
+      for (let index in this.$data.items) {
+        if (this.$data.items[index]._id === update.id) {
+          this.$data.items[index][update.setting.name] = update.setting.value
+          // console.log('form field update', update.setting.name, this.$data.items[update.type][index][update.setting.name])
+          this.$data.saved = false
+          return
+        }
+      }
     },
     nameUnique (device, index) {
       //  do unique checking on loaded names
@@ -179,7 +171,7 @@ export default {
     }
   },
   components: {
-    QForm
+    QFormc
   },
   created () {
     // const switches = api.service('switches')
@@ -237,7 +229,7 @@ export default {
     background red
     color white
 
-.q-collapsible-sub-item 
+.q-collapsible-sub-item
   background $tertiary
   color white
 
@@ -255,7 +247,7 @@ export default {
    background $blue-10
 
 // dialog inputs
-.modal 
+.modal
   .q-input-target
     color black
     background white
