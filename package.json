@@ -1,8 +1,8 @@
 {
-  "name": "quasar-app",
+  "name": "UCI-Lighting-Frontend",
   "version": "0.0.1",
-  "description": "A Quasar App",
-  "author": "Your Name",
+  "description": "uCommandIt lighting frontend",
+  "author": "David Kebler",
   "scripts": {
     "clean": "node build/script.clean.js",
     "dev": "node build/script.dev.js",
@@ -18,9 +18,9 @@
     "quasar-extras": "0.0.8",
     "quasar-framework": "^0.14.4",
     "socket.io-client": "^2.0.3",
-    "vue": "^2.4.4",
+    "vue": "^2.3.4",
     "vue-router": "^2.0.0",
-    "vuex": "^2.4.1",
+    "vuex": "^2.3.1",
     "vuex-router-sync": "^4.3.2"
   },
   "devDependencies": {
@@ -63,7 +63,7 @@
     "url-loader": "^0.5.7",
     "vue-loader": "^12.0.2",
     "vue-style-loader": "^3.0.1",
-    "vue-template-compiler": "^2.4.4",
+    "vue-template-compiler": "^2.3.4",
     "webpack": "^2.2.1",
     "webpack-dev-middleware": "^1.8.4",
     "webpack-hot-middleware": "^2.17.0",

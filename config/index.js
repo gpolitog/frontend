@@ -47,6 +47,7 @@ module.exports = {
     proxyTable: {
   '/api': {
     target: 'http://localhost:3030',
+    // target: 'http://192.168.43.114:3030', // samsung phone network
     changeOrigin: true
   }
 }
