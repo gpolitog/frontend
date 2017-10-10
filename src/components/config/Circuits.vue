@@ -208,29 +208,12 @@ export default {
       .catch((err) => {
         console.log('error loading circuits from server', err)
       })
-    // server service emits stateChange event whenever change of state is written
-    // all clients should listen for this
-    // circuits.on('changeRequest', res => {
-    //   console.log('change request listerner for', find(this.items, { _id: res.id }).name)
-    //   // use lowdash array find method? lowdb or objectdb from tasktimer guy
-    //   // for (let i in this.$data.items) {
-    //   //   if (this.items[i]._id === circuit._id) {
-    //   //     this.items[i].on = circuit.on
-    //   //     Toast.create.info(`Circuit State Event => ${circuit.name} is now ${this.state(circuit)}`)
-    //   //     return
-    //   //    }
-    //   // }
-    // })
 
     circuits.on('changeComplete', res => {
-      // console.log('listener', res)
       let index = findIndex(this.items, { _id: res.id })
       console.log('change complete for', find(this.items, { _id: res.id }).name, index)
       this.items[index].on = res.on
-      // Toast.create.info(`Circuit State Event => ${circuit.name} is now ${this.state(circuit)}`)
-      //     return
-      //    }
-      // }
+      Toast.create.info(`Circuit ${this.items[index].name} is now ${this.state(this.items[index])}`)
     })
   }
 }
