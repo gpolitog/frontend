@@ -33,8 +33,11 @@
 import api from 'src/api'
 import { Toast, Dialog } from 'quasar'
 import QFormc from '../helpers/CollapsibleForm.vue'
-const circuits = api.service('circuits')
 
+import find from 'lodash.find'
+import findIndex from 'lodash.findindex'
+
+const circuits = api.service('circuits')
 const hardware = api.service('hardware')
 
 export default {
@@ -147,9 +150,15 @@ export default {
       else { return 'off' }
     },
     toggle (item) {
-      let state = !item.on
-      console.log('Toggling state for ', item.name)
-      circuits.patch(item._id, { on: state })
+      let request = !item.on
+      console.log('state change request', request, item.name)
+      circuits.get(item._id)
+       .then(current => {
+         if (request !== current.on) {
+           console.log(`patching a state change request of ${request} for ${current.name}`)
+           circuits.patch(item._id, { request: request })
+         }
+       })
     },
     relayBanksOptions () {
       hardware.find({
@@ -201,17 +210,27 @@ export default {
       })
     // server service emits stateChange event whenever change of state is written
     // all clients should listen for this
-    circuits.on('stateChange', resp => {
-      let circuit = resp.data
-      console.log(`Updating circuit ${circuit.name}s state in component with ${this.state(circuit)}`)
-      // use lowdash array find method? lowdb or objectdb from tasktimer guy
-      for (let i in this.$data.items) {
-        if (this.items[i]._id === circuit._id) {
-          this.items[i].on = circuit.on
-          Toast.create.info(`Circuit State Event => ${circuit.name} is now ${this.state(circuit)}`)
-          return
-        }
-      }
+    // circuits.on('changeRequest', res => {
+    //   console.log('change request listerner for', find(this.items, { _id: res.id }).name)
+    //   // use lowdash array find method? lowdb or objectdb from tasktimer guy
+    //   // for (let i in this.$data.items) {
+    //   //   if (this.items[i]._id === circuit._id) {
+    //   //     this.items[i].on = circuit.on
+    //   //     Toast.create.info(`Circuit State Event => ${circuit.name} is now ${this.state(circuit)}`)
+    //   //     return
+    //   //    }
+    //   // }
+    // })
+
+    circuits.on('changeComplete', res => {
+      // console.log('listener', res)
+      let index = findIndex(this.items, { _id: res.id })
+      console.log('change complete for', find(this.items, { _id: res.id }).name, index)
+      this.items[index].on = res.on
+      // Toast.create.info(`Circuit State Event => ${circuit.name} is now ${this.state(circuit)}`)
+      //     return
+      //    }
+      // }
     })
   }
 }

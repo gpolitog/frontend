@@ -1,13 +1,16 @@
 module.exports = {
   root: true,
-  parser: 'babel-eslint',
   parserOptions: {
+    parser: 'babel-eslint',
     sourceType: 'module'
   },
   env: {
     browser: true,
   },
   // https://github.com/feross/standard/blob/master/RULES.md#javascript-standard-style
+  // extends: [
+  //   'plugin:vue/recommended' // or 'plugin:vue/base'
+  // ],
   extends: 'standard',
   // required to lint *.vue files
   plugins: [
@@ -29,5 +32,6 @@ module.exports = {
     // allow debugger during development
     'no-debugger': process.env.NODE_ENV === 'production' ? 2 : 0,
     'brace-style': [2, 'stroustrup', { 'allowSingleLine': true }]
+    // 'vue/valid-v-if': 'error'
   }
 }

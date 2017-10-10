@@ -116,6 +116,9 @@ export default {
         this.$data.switches = response.data
         console.log('loading all user virtual switch data')
       })
+      .catch((err) => {
+        console.log('error virtual switches', err)
+      })
     switches.find({
       query: { type: 'view' },
       paginate: false
@@ -124,6 +127,9 @@ export default {
         this.$data.views = response.data
         this.$data.views.push({ name: 'All', _id: 'all' })
         console.log('loading all switch views', this.views[this.views.length - 1])
+      })
+      .catch((err) => {
+        console.log('error loading views', err)
       })
 // when should I use vuex instead of loading from server - might be better for realtime updates
     circuits.find({

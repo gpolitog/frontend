@@ -84,7 +84,7 @@ export default {
     return {
       appName: 'Lighting - 645 Broadway',
       subTitle: '645 Broadway',
-      configMode: false,
+      configMode: true,
       admin: true,
       authenticated: true,
       tbc: 'red'
@@ -124,7 +124,7 @@ export default {
     })
   },
   mounted () {
-    // this.$router.push({ path: '/switches/favorites' })
+    // this.$router.push({ path: '/config/hardware' })
   },
   beforeDestroy () {
   }

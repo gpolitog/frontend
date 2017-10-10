@@ -7,8 +7,7 @@
        Add A Hardware Device to the System
       </q-tooltip>
     </q-btn>
-    </div>
-
+  </div>
            <q-list>
              <div class="row no-wrap" v-for="(item, index) in $data.items">
                <q-formc class="col-11" :item="item" :schema="schema[item.hardware].settings" @changed="updateItem" :saved="saved" @save="saveChanges" @reset="reset"></q-formc>
@@ -19,26 +18,6 @@
                </q-btn>
              </div>
            </q-list>
-
-
-<!-- <q-tabs color="secondary" v-if="ready"  inverted >
-  <div v-for="type in Object.keys(schema)">
-    <q-tab :name="type"  :label="type"  slot="title" />
-     <q-tab-pane :name="type">
-       <q-list>
-         <div class="row no-wrap" v-for="(item, index) in $data.items[type]">
-           <q-formc class="col-11" :item="item" :schema="schema[type]" @changed="updateItem" :saved="saved" @save="saveChanges" @reset="reset"></q-formc>
-           <q-btn class="col-1" color= "warning" icon="fa-close" @click="remove(item,index)">
-             <q-tooltip anchor="bottom middle" self="top middle" :offset="[0, 20]">
-              Delete {{ itemName }} - {{ item.name }}
-             </q-tooltip>
-           </q-btn>
-         </div>
-       </q-list>
-     </q-tab-pane>
-   </div>
-</q-tabs> -->
-
 </div>
 </template>
 
