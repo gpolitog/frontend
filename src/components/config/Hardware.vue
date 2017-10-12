@@ -179,6 +179,13 @@ export default {
         this.$data.schema = schema
         this.hardwareOptions()
         return hardware.find({
+          query: {
+            $sort: {
+              category: -1,
+              hardware: -1,
+              name: 1
+            }
+          },
           paginate: false
         })
           .then((response) => {

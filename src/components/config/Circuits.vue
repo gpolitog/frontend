@@ -17,7 +17,7 @@
            Delete {{ itemName }} - {{ item.name }}
           </q-tooltip>
         </q-btn>
-        <q-btn class="col-3":class= "state(item)" @click="toggle(item,index)">Toggle Circuit
+        <q-btn class="col-3" :class= "state(item)" @click="toggle(item,index)">Toggle Circuit
         <q-tooltip anchor="bottom middle" self="top middle" :offset="[0, 20]">
          Test Circuit by Turning on and off
         </q-tooltip>
@@ -34,7 +34,7 @@ import api from 'src/api'
 import { Toast, Dialog } from 'quasar'
 import QFormc from '../helpers/CollapsibleForm.vue'
 
-import find from 'lodash.find'
+// import find from 'lodash.find'
 import findIndex from 'lodash.findindex'
 
 const circuits = api.service('circuits')
@@ -151,11 +151,11 @@ export default {
     },
     toggle (item) {
       let request = !item.on
-      console.log('state change request', request, item.name)
+      console.log('state change request of', request ? 'on' : 'off', item.name)
       circuits.get(item._id)
        .then(current => {
          if (request !== current.on) {
-           console.log(`patching a state change request of ${request} for ${current.name}`)
+           console.log(`patching a state change request = ${request ? 'on' : 'off'} for ${current.name}`)
            circuits.patch(item._id, { request: request })
          }
        })
@@ -211,9 +211,9 @@ export default {
 
     circuits.on('changeComplete', res => {
       let index = findIndex(this.items, { _id: res.id })
-      console.log('change complete for', find(this.items, { _id: res.id }).name, index)
       this.items[index].on = res.on
-      Toast.create.info(`Circuit ${this.items[index].name} is now ${this.state(this.items[index])}`)
+      console.log('change complete for', this.items[index].name, this.items[index].on ? 'on' : 'off')
+      // Toast.create.info(`Circuit ${this.items[index].name} is now ${this.state(this.items[index])}`)
     })
   }
 }
