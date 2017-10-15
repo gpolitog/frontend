@@ -72,10 +72,19 @@ export default {
       if (item.on) { return 'on' }
       else { return 'off' }
     },
-    toggle (item) {
-      let state = !item.on
-      console.log('Toggling state for ', item.name, state)
-      switches.patch(item._id, { on: state })
+    async toggle (item) {
+      let request = !item.on
+      console.log(item.name, 'state change request of', request ? 'on' : 'off')
+      if (item.circuits.length !== 0) {
+        for (let circuitID of item.circuits) {
+          console.log('circuit to toggle', circuitID)
+          // better to do a swtich patch here and then do circuit changes from hook
+          await circuits.patch(circuitID, { request: request })
+        }
+      }
+      // ***************** TODO Must come up with easy way to know when all circuits for switch have changed
+      item.on = request
+      switches.patch(item._id, { on: request })  // because all circuits changed
     },
     getCircuits (aswitch) {
       let switchCircuits = []
@@ -144,9 +153,10 @@ export default {
       })
 
     // If another client has changed the state of virtual switch
+    // Better to use a custom event in case basic patch is used for something else
     switches.on('patched', aswitch => {
       console.log(`changing switch ${aswitch.name}s state to ${this.state(aswitch)}`)
-      // use lowdash array find method? lowdb or objectdb from tasktimer guy
+      // use lodash.find
       for (let i in this.switches) {
         if (this.switches[i]._id === aswitch._id) {
           this.switches[i].on = aswitch.on

@@ -261,7 +261,10 @@ export default {
     getSwitches (type) {
       return switches.find({
         query: {
-          type: type
+          type: type,
+          $sort: {
+            name: 1
+          }
         },
         paginate: false
       })
