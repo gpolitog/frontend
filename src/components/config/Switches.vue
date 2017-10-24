@@ -40,6 +40,9 @@ const switches = api.service('switches')
 const hardware = api.service('hardware')
 const circuits = api.service('circuits')
 
+// import find from 'lodash.find'
+import sortBy from 'lodash.sortby'
+
 export default {
   data () {
     return {
@@ -246,12 +249,15 @@ export default {
       })
         .then((response) => {
           let option = {}
+          let options = []
           let circuits = response.data
           for (let circuit in circuits) {
             option = {label: circuits[circuit].name, value: circuits[circuit]._id}
-            this.$data.schema.physical.circuits.fieldProps.options.push(option)
-            this.$data.schema.virtual.circuits.fieldProps.options.push(option)
+            options.push(option)
           }
+          options = sortBy(options, 'label')
+          this.$data.schema.physical.circuits.fieldProps.options = options
+          this.$data.schema.virtual.circuits.fieldProps.options = options
           console.log('circuit options', this.$data.schema.physical.circuits.fieldProps.options)
         })
         .catch((err) => {

@@ -6,11 +6,33 @@
       <q-tooltip anchor="bottom middle" self="top middle" :offset="[0, 20]">
        Add A Relay Controlled Circuit to the System
       </q-tooltip>
-    </q-btn>
-    </div>
+      </q-btn>
+      <q-btn color="secondary" @click="load(0)">Sort by Relay Bank
+      <q-tooltip anchor="bottom middle" self="top middle" :offset="[0, 20]">
+       Sort by Relay Bank, Port and Pin
+      </q-tooltip>
+      </q-btn>
+      <q-btn color="secondary" @click="load(1)">Sort by Name
+      <q-tooltip anchor="bottom middle" self="top middle" :offset="[0, 20]">
+       Sort by Name
+      </q-tooltip>
+      </q-btn>
+      <q-btn color="secondary" @click="load(2)">Sort by Location
+      <q-tooltip anchor="bottom middle" self="top middle" :offset="[0, 20]">
+       Sort by Location (floor or outside) then Name
+      </q-tooltip>
+      </q-btn>
+      filter by bank
+      <q-radio v-model="bank" val="-1" label="all" />
+      <q-radio v-model="bank" val="-2" label="new" />
+      <q-radio v-model="bank" val="0" label="1" />
+      <q-radio v-model="bank" val="3" label="2" />
+      <q-radio v-model="bank" val="1" label="3" />
+      <q-radio v-model="bank" val="2" label="4" />
+      </div>
 
     <q-list>
-      <div class="row no-wrap" v-for="(item, index) in $data.items">
+      <div class="row no-wrap" v-for="(item, index) in filtered()">
         <q-formc class="col-8" :item="item" :schema="schema" @changed="updateItem" :saved="saved" @save="saveChanges" @reset="reset"></q-formc>
         <q-btn class="col-1" color= "warning" icon="fa-close" @click="remove(item,index)">
           <q-tooltip anchor="bottom middle" self="top middle" :offset="[0, 20]">
@@ -18,9 +40,6 @@
           </q-tooltip>
         </q-btn>
         <q-btn class="col-3" :class= "state(item)" @click="toggle(item,index)">Toggle Circuit
-        <q-tooltip anchor="bottom middle" self="top middle" :offset="[0, 20]">
-         Test Circuit by Turning on and off
-        </q-tooltip>
         </q-btn>
       </div>
     </q-list>
@@ -36,9 +55,16 @@ import QFormc from '../helpers/CollapsibleForm.vue'
 
 // import find from 'lodash.find'
 import findIndex from 'lodash.findindex'
+import filter from 'lodash.filter'
 
 const circuits = api.service('circuits')
 const hardware = api.service('hardware')
+
+const sorts = [
+  { bankid: -1, port: -1, pin: -1 },
+  { name: 1 },
+  { location: 1, name: 1 }
+]
 
 export default {
   data () {
@@ -47,10 +73,43 @@ export default {
       itemName: 'circuit',
       schema: {},
       saved: true,
-      ready: false
+      ready: false,
+      sort: 2,
+      banks: [],
+      bank: -1
     }
   },
   methods: {
+    load (sort = this.sort) {
+      circuits.find({
+        query: {
+          $sort: sorts[sort]
+        },
+        paginate: false
+      })
+      .then((response) => {
+        this.$data.items = response.data
+        console.log('circuits loaded', response.data)
+      })
+      .catch((err) => {
+        console.log('error loading circuits from server', err)
+      })
+    },
+    filtered () {
+      console.log(this.banks, this.bank, this.banks[this.bank])
+      if (this.bank === '-2') {
+        return filter(this.$data.items, item => { return item.bankid === '' })
+      }
+      if (this.bank !== '-1') {
+        return filter(this.$data.items, item => {
+          if (this.banks[this.bank]._id) {
+            return item.bankid === this.banks[this.bank]._id
+          }
+          return false
+        })
+      }
+      return this.$data.items
+    },
     add () {
       Dialog.create({
         title: `Add a ${this.$data.itemName}`,
@@ -172,6 +231,7 @@ export default {
             option = {label: banks[bank].name, value: banks[bank]._id}
             this.$data.schema.bankid.fieldProps.options.push(option)
           }
+          this.banks = banks
           console.log('bank options', this.$data.schema.bankid.fieldProps.options)
         })
         .catch((err) => {
@@ -192,22 +252,11 @@ export default {
       // adds device relay banks to schema options at mount
       // if keeping component in memory will need to listen for changes to hardware
       this.relayBanksOptions()
+      this.load() // load circuits
     })
     .catch((err) => {
       console.log('error loading schema from server', err)
     })
-
-    // load circuits
-    circuits.find({
-      paginate: false
-    })
-      .then((response) => {
-        this.$data.items = response.data
-        console.log('circuits loaded', response.data)
-      })
-      .catch((err) => {
-        console.log('error loading circuits from server', err)
-      })
 
     circuits.on('changeComplete', res => {
       let index = findIndex(this.items, { _id: res.id })

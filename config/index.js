@@ -46,7 +46,8 @@ module.exports = {
 		// https://github.com/chimurai/http-proxy-middleware
 		proxyTable: {
 			'/api': {
-				target: 'http://192.168.0.51:3030', // trantor on 645
+				// target: 'http://192.168.0.51:3030', // trantor on 645
+				target: 'http://192.168.0.31:3030', // on lighting-switches.local on 645
 				// target: 'http://localhost:3030',
 				// target: 'http://192.168.43.114:3030', // samsung phone network
 				changeOrigin: true
